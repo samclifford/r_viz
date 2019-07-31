@@ -5,9 +5,7 @@
 # Consider an SIR model. Infected individuals pass the infection on to 
 # Susceptibles with beta = 1.56756 and eventually die with gamma = 0.36508
 #
-# 100 simulations have been performed in order to understand the disease's
-# prevalence and incidence in the population. A CSV file has been provided for
-# each of the four populations in the model:
+# A CSV file has been provided for each of the three populations in the model:
 #  S  - susceptible
 #  I - first stage of infection
 #  R  - deceased
@@ -17,36 +15,37 @@ f_sir <- function(time, state, parameters) {
     
     with(as.list(c(state, parameters)), {
         
-        infections1 <- beta*S*I1
+        infections  <- beta*S*I1
         deaths      <- gamma*I1
         
-        dS <- -infections1
-        dI <-  infections1 - deaths
-        dR <-                deaths
+        dS <- -infections 
+        dI <-  infections - deaths
+        dR <-               deaths
         
         return(list(c(dS, dI, dR)))
     })
 }
 
+#####################################
+# A. Reading in data and plotting
+#####################################
 
-#############################
-# A. Reading in data
-#############################
+# First, let's do all our pre-processing of the data so that our plots look okay
+# from the get-go
 
 # A.1 Read in the CSV files and convert them to a long format data frame
-# Ensure you have made `State` into a factor variable
+# Ensure you have made `state` into a factor variable
+
 library(tidyverse)
 
 all_dat <- read_csv("beta_1.56756_gamma_0.36508.csv")
 
 all_dat_long <- ???
+    
 all_dat_long$State <- ???
 
-#############################
-# B. Plotting the simulation
-#############################
 
-# B.1 With your long data frame, make a plot that shows how the proportion of 
+# A.2 With your long data frame, make a plot that shows how the proportion of 
 # the population in each state changes over time. You may choose any plotting
 # geometry you consider appropriate from the documentation, and look at using
 # aesthetics such as group, colour or fill, or faceting, to show variation
