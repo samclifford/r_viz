@@ -1,7 +1,7 @@
 ---
-title: "Visualisation"
-author: "Sam Clifford, Belinda Spratt, Ruth Luscombe, Sama Low Choy"
-date: "Week 2 2018"
+title: "It was the best of plots, it was the worst of plots"
+author: "Sam Clifford"
+date: "2019-10-31"
 output:
   beamer_presentation:
     keep_tex: true
@@ -25,9 +25,9 @@ csl: chicago-author-date.csl
   
 ```{r global_options, include=FALSE}
 library(knitr)
-library(ggplot2)
-library(dplyr)
+library(tidyverse)
 library(ggthemes)
+
 output <- opts_knit$get("rmarkdown.pandoc.to")
 knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
                       fig.align="center",
@@ -43,7 +43,6 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
 * Showing the results of analysis
 * Showing the physical phenomenon being described
 * Describing an experimental setup
-
 
 ## Principles of graphical excellence
 
@@ -77,32 +76,17 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
 
 * We don't just make graphs because it's fun (but it totally is!)
 * We do it to communicate information
-* Graph must communicate what's in your mind to reader
+* Describing with summary statistics may not tell the whole story
+* Graph must communicate what's in your mind to reader, including key relationships
 * Reader should be able to understand what the graph means and not be
     - misled into thinking something that is untrue
     - distracted from the main point
     
-### Visualisation to encode information
-
-* Want to tell a story about what the data shows
-* Sometimes difficult to show all the data as a table
-* Describing with summary statistics may not tell the whole story
-* Want to show relationships between variables to reader
-
-
 # Building plots
 
-###
-
-\begin{figure}
-\includegraphics[width=0.8\linewidth]{scientific_paper_graph_quality.png}
-\caption{Source: \href{https://xkcd.com/1945/}{xkcd}. Licensed cc: by-nc 2.5}
-\end{figure}
-
-### Approach in SEB113
+### Building plots
 
 * R package `ggplot2` uses a grammar of graphics \citep{layered-grammar, cheatsheets}
-    - write code to make pictures
     - map variables in data frame to aesthetic options in the plot
     - choose a geometry for how to display these variables
     - adjustments to axis scales
@@ -158,7 +142,7 @@ ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point()
 ```
 
 
-### Approach in SEB113 -- `ggplot2`
+### Building a plot -- an example
 
 * This should probably have some meaningful axis labels and we can use a nicer looking theme
 
@@ -174,7 +158,7 @@ ggplot(data = bone,
 ```
 
 
-### Approach in SEB113 -- `ggplot2`
+### Building a plot -- an example
 
 ``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4}
 library(hrbrthemes)
@@ -224,40 +208,32 @@ ggplot(data = bone,
     - some explained in this lecture
     - some in later weeks and online \citep{layered-grammar, cheatsheets}
 
-### Presentation of plots
+<!-- ### Presentation of plots -->
 
-* Figures in reports should have
-    - meaningful caption below figure 
-    - figure number to refer to in main text
-    - legible text in axis labels and annotations
-    - optionally a title (don't just repeat caption)
-    - high enough resolution that you can make out all graphical elements
+<!-- ``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap="Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12", res=300} -->
 
-### Presentation of plots
+<!-- #png(width = 6, height = 3, filename = "fancy_2.png", units = "in", res = 300) -->
+<!-- ggplot(data = bone, -->
+<!--        aes(x = age, y = spnbmd)) + -->
+<!--   geom_point(alpha = 0.125, stroke=0, pch=19, -->
+<!--              size=0.75) + -->
+<!--   geom_line(data=bone.repeats, -->
+<!--             aes(group = idnum), alpha = 0.05) + -->
+<!--   facet_wrap(~ gender) + -->
+<!--   theme_bw() + -->
+<!--   geom_line(data=bone, stat="smooth", -->
+<!--               alpha = 0.25, -->
+<!--               #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") + -->
+<!--               method="loess", color="blue", -->
+<!--             size=1.5) + -->
+<!--   labs( -->
+<!--     x = "Age (years)", -->
+<!--     #y = expression(Rel.~Bone~Mineral\\n~Density~(g ~ cm ^ {-3}~yr^{-1}))) -->
+<!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1})))) -->
 
-``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap="Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12", res=300}
+<!-- ``` -->
 
-#png(width = 6, height = 3, filename = "fancy_2.png", units = "in", res = 300)
-ggplot(data = bone,
-       aes(x = age, y = spnbmd)) +
-  geom_point(alpha = 0.125, stroke=0, pch=19,
-             size=0.75) +
-  geom_line(data=bone.repeats,
-            aes(group = idnum), alpha = 0.05) +
-  facet_wrap(~ gender) +
-  theme_bw() +
-  geom_line(data=bone, stat="smooth",
-              alpha = 0.25,
-              #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") +
-              method="loess", color="blue",
-            size=1.5) +
-  labs(
-    x = "Age (years)",
-    #y = expression(Rel.~Bone~Mineral\\n~Density~(g ~ cm ^ {-3}~yr^{-1})))
-    y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))))
-
-```
-
+# Some common geometries
 
 ### Boxplot
 
@@ -276,8 +252,6 @@ ggplot(data=granite,
 \normalsize
 
 * **outliers** shown as dots, indicating they're far away from typical values
-
-## Scatter plot
 
 ### Scatter plot
 
@@ -308,8 +282,6 @@ ggplot(data = bone,
     y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) +
   theme_bw() + theme(legend.position="bottom")
 ```
-
-## Line plot
 
 ### Line plot
 
@@ -353,15 +325,13 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 
 ### Line plots
 
-* Not restricted to traditional ideas of a graph
+* Not restricted to traditional ideas of a graph (cited in @tufte)
+
 
 \begin{figure}
 \includegraphics[width=0.9\linewidth]{beetle.jpg}
 \end{figure}
 
-Cited in @tufte
-
-## Scatterplot smoother
 
 ### Smooth plot
 
@@ -386,7 +356,8 @@ ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
 * Can view 3-5 dimensions in the data on a 2D page
     - Often a better alternative to 3D, since it doesn't distort comparisons
     - Inner axes relate to the smallest X-Y plots
-    - Outer axes relate to the grouping variables.
+    - Outer axes relate to the grouping variables
+* Avoids using loops
 
 ### Small multiples
 
@@ -459,16 +430,10 @@ deaths.long.sex <- list(Male = mdeaths,
                        value = Deaths, # Stack each Month's column values
                        -c(Sex, Year))   %>%        # don't stack the Year column
   mutate(Month = fct_inorder(Month),
-         Month.num = as.numeric(Month),
-         Year = parse_number(Year))
+         Month.num = as.numeric(Month))
 
 ```
 
-
-``` {r, eval=T, echo=F}
-deaths.long.sex[c(1, 64, 87, 108, 114, 127) , ] %>%
-  kable(format = 'markdown')
-```
 
 ### Small multiples
 
@@ -481,48 +446,6 @@ ggplot(data=deaths.long.sex, aes(x=Month.num, y=Deaths)) +
                      labels=c("Jan", "Jul"),
                      minor_breaks = seq(1,12),
                      name="Month of the year")
-```
-
-# Resizing plots
-
-### Resizing plots
-
-* If you want your plot to be taller or shorter, narrower or wider, do so before you save
-* Choice of aspect ratio can help reader identify pattern in data
-* @cleveland calls this **banking to $45^{\circ}$**
-* Want the interesting feature in the plot to be at a $45^{\circ}$ angle
-
-### Which plot is more interpretable?
-
-``` {r, fig.height=6, fig.width=8, eval=T, echo=F, message=F, out.width="100%"}
-g <- deaths.long.sex %>%
-  mutate(Date = as.Date(paste("01", Month, Year, sep=" "), format="%d %b %Y" )) %>%
-  mutate(Sex = substr(Sex, 1,1)) %>%
-  ggplot(data=., aes(x=Date, y=Deaths)) +
-  geom_line(aes(color=Sex)) + theme_bw() +
-  theme(legend.justification=c(0,1), legend.position=c(0,1), legend.direction = "horizontal", legend.background = element_rect(fill=NA, color=NA)) +
-  ylim(c(0, 3000))
-
-library(grid)
-library(gridExtra)
-
-lay <- rbind(c(1,1,1,2,2),
-             c(1,1,1,2,2),
-             c(1,1,1,2,2),
-             c(1,1,1,2,2),
-             c(3,3,3,3,3),
-             c(3,3,3,3,3),
-             c(4,4,4,4,4))
-
-grid.arrange(
-  grobs = 
-    list(g,g,g,
-         g +
-           theme(
-             legend.position = "right",
-             legend.direction="vertical")),
-  layout_matrix = lay,
-  vp=viewport(width=0.9, height=1))
 ```
 
 # Other plotting aesthetics
