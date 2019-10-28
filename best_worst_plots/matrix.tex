@@ -6,19 +6,12 @@
 \def\begincol{\begin{column}}
 \def\endcol{\end{column}}
 \def\endcols{\end{columns}}
-\usepackage{tikz}
-\usetikzlibrary{calc,arrows}    
-\usetikzlibrary{shapes.geometric, arrows, arrows.meta}
-\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,fit,positioning,shapes.symbols,chains}
-\usepackage{smartdiagram}
 \makeatletter
 \renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
   \hskip -\arraycolsep
   \let\@ifnextchar\new@ifnextchar
   \array{#1}}
 \makeatother
-\usepackage{circuitikz}
-\usepackage{siunitx}
 \DeclareSIUnit\horsepower{hp}
 \usepackage{xstring}
 \usepackage{float}

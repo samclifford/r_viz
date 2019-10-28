@@ -13,11 +13,7 @@ output:
       in_header: matrix.tex
 tables: yes
 header-includes:
-- \usepackage{tikz}
 - \usepackage{hyperref}
-- \usetikzlibrary{shapes.geometric, arrows}
-- \usetikzlibrary{calc}
-- \usepackage{smartdiagram}
 - \usepackage{longtable}
 bibliography: extras.bib
 csl: chicago-author-date.csl
@@ -323,15 +319,6 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
        title = "Daily mean Ozone in NYC (1973)")
 ```
 
-### Line plots
-
-* Not restricted to traditional ideas of a graph (cited in @tufte)
-
-
-\begin{figure}
-\includegraphics[width=0.9\linewidth]{beetle.jpg}
-\end{figure}
-
 
 ### Smooth plot
 
@@ -405,8 +392,6 @@ ggplot(data = granite, aes(x=AreaMicron2)) +
 * reshaping `mdeaths` and `ldeaths` into long format and combining into one data frame (not shown) and converting month to a numeric value, a random sample of our data now looks like
 
 ``` {r, echo=F}
-rm(mdeaths)
-rm(fdeaths)
 mdeaths <- data.frame(matrix(mdeaths, 
                   ncol=12,
                   byrow=T))
