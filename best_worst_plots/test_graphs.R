@@ -29,11 +29,14 @@ ggplot(data = Weather, aes(x = yday, y = avg_temp)) +
                 alpha = 0.5) +
     facet_grid(.~city)
 
-Weather %>%
+mutate(Weather, month = floor_date(date, "month")) %>%
     group_by(city, month, year) %>%
     summarise_at(.vars = vars(contains("temp")), .funs = list(mean))  %>%
-    ggplot(data = ., aes(x = year + (month-1)/12, y = avg_temp)) +
+    ggplot(data = ., aes(x = month, y = avg_temp)) +
     geom_line() +
     geom_ribbon(aes(ymin = low_temp, ymax = high_temp),
-                alpha = 0.5) +
-    facet_grid(city ~ ., scales = "free_y")
+                alpha = 0.25) + theme_bw() +
+    xlab("Date") + ylab(expression(Temperature~(degree*F))) +
+    ggtitle("Monthly average of daily mean, min and max temperatures") +
+    facet_grid(city ~ year, scales = "free") +
+    scale_x_date(date_labels = "%b")
