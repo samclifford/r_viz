@@ -1,13 +1,15 @@
 ---
-title: "It was the best of plots, it was the worst of plots"
+title: "Visualisation with ggplot2"
+subtitle: "2031 - Statistical Computing"
 author: "Sam Clifford"
-date: "2019-10-31"
+date: "2019-11-08"
 output:
   beamer_presentation:
     keep_tex: true
     theme: "Hannover"
     colortheme: "dove"
     fonttheme: "professionalfonts"
+    latex_engine: xelatex
     citation_package: natbib
     includes: 
       in_header: matrix.tex
@@ -31,40 +33,6 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
 
 # Principles of graphical excellence
 
-### Many uses of visualisation in science
-
-* Showing the data
-* Showing the results of analysis
-* Showing the physical phenomenon being described
-* Describing an experimental setup
-
-
-### Tufte's principles
-
-\citet{tufte} and \citet{pantoliano}
-
-* Show the data
-    - Induce the viewer to think about the substance of the findings rather than the methodology, the graphical design, or other aspects
-    - Avoid distorting what the data have to say
-    - Serve a clear purpose:  description, exploration, tabulation, or decoration
-
-* Provide clarity
-    - Present many numbers in a small space, i.e., efficiently
-    - Make large data sets coherent
-    - Be closely integrated with the statistical and verbal descriptions of the data set
-  
-### Tufte's principles
-
-* Allow comparison where appropriate
-    - Encourage the eye to compare different pieces of data
-    - Reveal the data at several levels of detail, from a broad overview to the fine structure
-
-* Visual representations of data must tell the truth
-* Good graphical representations maximise data-ink and erase as much non-data-ink as possible
-* Avoid chartjunk, the excessive and unnecessary use of graphical effects in graphs
-* Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
-* Produce graphs with high data density
-
 ### Why do we visualise?
 
 * We don't just make graphs because it's fun (but it totally is!)
@@ -74,6 +42,34 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
 * Reader should be able to understand what the graph means and not be
     - misled into thinking something that is untrue
     - distracted from the main point
+
+
+### Tufte's principles
+
+\citet{tufte} and \citet{pantoliano}
+
+* Show the data
+    - View should think about substance of the findings rather than methodology, graphical design, or other aspects
+    - Avoid distorting what the data have to say
+    - Serve a clear purpose:  description, exploration, tabulation, or decoration
+
+* Provide clarity
+    - Present many numbers in a small space (as opposed to a table)
+    - Make large data sets coherent
+    - Be closely integrated with the statistical and verbal descriptions of the data set
+  
+### Tufte's principles
+
+* Allow comparison where appropriate
+    - Encourage the eye to compare different pieces of data
+    - Reveal the data at several levels of detail, from a broad overview to the fine structure
+
+* Produce graphs with high data density by
+    * maximising data-ink and erasing non-data-ink 
+    * careful use of whitespace
+* Avoid excessive and unnecessary use of graphical effects (chartjunk)
+* Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
+
     
 # Building plots
 
@@ -88,7 +84,6 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
   
 ### Building a plot
 
-
 * How do we structure a call to `ggplot` to make a plot?
     - load `ggplot2` package
     - Specify we want a `ggplot` object and which data frame we're going to use, 
@@ -102,81 +97,78 @@ ggplot(data = my.data.frame,
   geom_point()
 ```
 
-<!-- ### Building a plot -- an example -->
+### Building a plot -- an example
 
-<!-- * `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is change in spinal bone mineral density divided by time between two successive visits -->
+* `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is rate of change in spinal bone mineral density, two successive measurements divided by time between them
 
-<!-- \tiny -->
+\tiny
 
-<!-- ``` {r, eval=T, echo=T, fig.width=4, fig.height=2} -->
-<!-- library(ElemStatLearn) -->
-<!-- library(ggplot2) -->
+``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
+library(ElemStatLearn)
+library(ggplot2)
 
-<!-- ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point() -->
-<!-- ``` -->
-
-
-<!-- ### Building a plot -- an example -->
-
-<!-- * This should probably have some meaningful axis labels and we can use a nicer looking theme -->
-
-<!-- \tiny -->
-
-<!-- ``` {r, eval=T, echo=T, fig.width=4, fig.height=2} -->
-<!-- ggplot(data = bone, -->
-<!--        aes(x = age, y = spnbmd)) + -->
-<!--   geom_point() + -->
-<!--   labs(x = "Age (years)", -->
-<!--     y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) + -->
-<!--   theme_bw() -->
-<!-- ``` -->
+ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point()
+```
 
 
-<!-- ### Building a plot -- an example -->
+### Building a plot -- an example
 
-<!-- ``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4} -->
-<!-- library(hrbrthemes) -->
-<!-- library(dplyr) -->
-<!-- library(stringi) -->
-<!-- library(magrittr) -->
+* This should probably have some meaningful axis labels and we can use a nicer looking theme
 
-<!-- bone %<>% -->
-<!--   count(idnum) %>% -->
-<!--   inner_join(bone) %>% -->
-<!--   mutate(gender = stri_trans_totitle(gender)) -->
+\tiny
 
-<!-- bone.singleton <- bone %>% -->
-<!--   filter(n==1) -->
+``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
+ggplot(data = bone,
+       aes(x = age, y = spnbmd)) +
+  geom_point() +
+  labs(x = "Age (years)",
+    y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) +
+  theme_bw()
+```
 
-<!-- bone.repeats <- bone %>% -->
-<!--   group_by(idnum) %>% -->
-<!--   filter(n > 1) -->
 
-<!-- ggplot(data = bone, -->
-<!--        aes(x = age, y = spnbmd)) + -->
-<!--   geom_point(alpha = 0.125, stroke=0, pch=19, -->
-<!--              size=0.75) + -->
-<!--   geom_line(data=bone.repeats, -->
-<!--             aes(group = idnum), alpha = 0.05) + -->
-<!--   facet_wrap(~ gender) + -->
-<!--   theme_bw() + -->
-<!--   geom_line(data=bone, stat="smooth", -->
-<!--               alpha = 0.25, -->
-<!--               #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") + -->
-<!--               method="loess", color="blue", -->
-<!--             size=1.5) + -->
-<!--   labs( -->
-<!--     x = "Age (years)", -->
-<!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))), -->
-<!--     title = "Relative spinal bone mineral density"#, -->
-<!--     #caption = "Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12" -->
-<!--   ) -->
+### Building a plot -- an example
 
-<!-- ``` -->
+``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4}
+library(dplyr)
+library(stringi)
+library(magrittr)
 
-<!-- * We can keep adding more elements and options to show more details of the data -->
-<!--     - some explained in this lecture -->
-<!--     - some in later weeks and online \citep{layered-grammar, cheatsheets} -->
+bone %<>%
+  count(idnum) %>%
+  inner_join(bone) %>%
+  mutate(gender = stri_trans_totitle(gender))
+
+bone.singleton <- bone %>%
+  filter(n==1)
+
+bone.repeats <- bone %>%
+  group_by(idnum) %>%
+  filter(n > 1)
+
+ggplot(data = bone,
+       aes(x = age, y = spnbmd)) +
+  geom_point(alpha = 0.125, stroke=0, pch=19,
+             size=0.75) +
+  geom_line(data=bone.repeats,
+            aes(group = idnum), alpha = 0.05) +
+  facet_wrap(~ gender) +
+  theme_bw() +
+  geom_line(data=bone, stat="smooth",
+              alpha = 0.25,
+              #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") +
+              method="loess", color="blue",
+            size=1.5) +
+  labs(
+    x = "Age (years)",
+    y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))),
+    title = "Relative spinal bone mineral density"#,
+    #caption = "Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12"
+  )
+
+```
+
+We can keep adding more elements and options to show more details of the data \citep{layered-grammar, cheatsheets}
 
 <!-- ### Presentation of plots -->
 
@@ -208,9 +200,8 @@ ggplot(data = my.data.frame,
 
 ### Scatter plot
 
-* For each observation in data, a pair of values $(x,y)$ is shown as a point
+* Each row in data has a pair of values $(x,y)$, shown as a point
 * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements)
-* e.g. if we want to show male and female relative bone density values with different colours
 
 \footnotesize
 
@@ -220,7 +211,7 @@ ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
   geom_point() +
   labs(x = "Solar radiation (Langleys)",
-       y = "Maximum daily temperature (F)") +
+       y = "Max. daily temperature (F)") +
   theme_bw()
 ```
 
@@ -232,25 +223,11 @@ ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
   geom_point() +
   labs(x = "Solar radiation (Langleys)",
-       y = "Maximum daily temperature (F)") +
+       y = "Max. daily temperature (F)") +
   theme_bw()
 ```
 
 
-### Boxplot
-
-\tiny
-
-``` {r, fig.height=2, fig.width=4, eval=T, echo=T}
-
-ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
-  geom_boxplot() + theme_bw() +
-  labs(y = "Ozone conc. (ppb)", x = "Month")
-```
-
-\normalsize
-
-* **outliers** shown as dots, indicating they're far away from typical values
 
 ### Line plot
 
@@ -267,9 +244,10 @@ ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
 
 ``` {r, fig.height=1.75, fig.width=4, echo=T}
 # make the date column
-airquality <-
-  mutate(airquality,
-         Date = as.Date(paste("1973", Month, Day, sep="-")))
+airquality$Date <- as.Date(paste("1973", 
+                                 airquality$Month,
+                                 airquality$Day,
+                                 sep="-"))
 
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + theme_bw() +
@@ -306,6 +284,22 @@ ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
   geom_point() + geom_smooth() + theme_bw() +
   labs(x=expression(Temperature~(degree*F)), y="Ozone (ppb)")
 ```
+
+
+### Boxplot
+
+\tiny
+
+``` {r, fig.height=2, fig.width=4, eval=T, echo=T}
+
+ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
+  geom_boxplot() + theme_bw() +
+  labs(y = "Ozone conc. (ppb)", x = "Month")
+```
+
+\normalsize
+
+* **outliers** shown as dots, indicating they're far away from typical values
 
 ### Bar/column plots
 
@@ -366,25 +360,36 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 
 ### Small multiples
 
-* If we have two (or more) grouping variables we can use `facet_grid(V1 ~ V2)` to tell R to repeat the plotting geometries for each value of `V1` and `V2` as rows and columns of a grid
+* If we have two (or more) grouping variables we can use `facet_grid()` to tell R to repeat the aesthetic and geometries for specified `rows` and `columns` variables
+
+
 
 \tiny
 
+
+
 ``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = "100%"}
 library(mosaicData)
+library(data.table)
 
 data(Weather)
 
-annual_5_cities <- Weather %>% 
-  group_by(city, month, year) %>%
-  summarise_at(.vars = vars(contains("temp")), .funs = list(mean))  %>%
-  ggplot(data = ., aes(x = month, y = avg_temp)) +
+Weather <- data.table(Weather)
+  
+Weather_summarised <-
+  Weather[ , 
+           lapply(.SD, mean),
+           by = .(city, month, year),
+           .SDcols = patterns("temp")]
+
+Weather_plot <-
+  ggplot(data = Weather_summarised, aes(x = month, y = avg_temp)) +
   geom_line() +
-  geom_ribbon(aes(ymin = low_temp, ymax = high_temp),
-              alpha = 0.25) + theme_bw() +
+  geom_ribbon(aes(ymin = low_temp, ymax = high_temp), alpha = 0.25) +
+  theme_bw() +
   xlab("Month") + ylab(expression(Temperature~(degree*F))) +
   ggtitle("Monthly average of daily mean, min and max temperatures") +
-  facet_grid(year ~ city) +
+  facet_grid(rows = vars(year), cols = vars(city)) +
   scale_x_continuous(breaks = seq(1, 12, by = 3))
 
 ```
@@ -395,120 +400,10 @@ annual_5_cities <- Weather %>%
 
 
 ``` {r, fig.height=3, fig.width=6, eval=T, echo=F, out.width="100%"}
-annual_5_cities
+Weather_plot
 ```
 
-# Other plotting aesthetics
 
-### # a e s t h e t i c
-
-* `ggplot2` allows the passing of arguments to a plotting geometry
-* Map things other than $x$ and $y$ coordinates
-* **Aesthetics** map variables to graphical elements such as
-    - **group** (repeat geometry for a grouping variable in same axes)
-    - **size**
-    - **shape**
-    - **colour**
-    - **alpha** transparency
-    - **fill** colour
-* We need to put these inside `aes()` brackets if we wish to map a variable
-* Optionally, putting them outside (but still inside the geometry) allows us to apply one value across the whole geometry
-
-### Group
-
-* Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes
-
-\tiny 
-
-``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width="100%"}
-library(ElemStatLearn)
-data(bone)
-
-ggplot(data = bone, aes(x = age, y = spnbmd)) +
-  geom_point(alpha=0.1) + facet_wrap(~ gender) +
-  geom_line(aes(group = idnum)) +  theme_bw() +
-  labs(x = "Age (years)", y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
-       title = "Relative spinal bone mineral density")
-
-```
-  
-\normalsize
-  
-* Especially useful when many, many groups
-  
-### Colour and fill
-
-* We can change the colour for the geometry as a whole by putting it outside the `aes()` brackets
-  * `colour` is the external part of geometry (e.g. bar boundary)
-  * `fill` is the internal part of geometry
-
-
-\tiny 
-
-``` {r, eval=T, echo=T, fig.height=2, fig.width=6, message=F, out.width="100%"}
-ggplot(data = airquality, aes(x = Ozone)) +  
-  geom_histogram(binwidth = 10, boundary = 0,
-                 fill = "lightskyblue", color = "black") +  
-  labs(x = "Ozone concentration (ppb)") +
-  theme_bw() + facet_wrap(~Month, nrow = 1)
-```
-
-### Size
-
-* Size refers to the elements of the plotting geometry
-    - radius of points
-    - thickness of lines
-
-\tiny
-
-``` {r, fig.height=3, fig.width=6, eval=T, echo=T, out.width="100%"}
-ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
-  geom_point(aes(size = Ozone), pch = 1) + theme(legend.position = "bottom") +
-  scale_size_area(name = "Ozone concentration (ppb)") +
-  labs(x = "Solar radiation (Langleys)",
-       y = expression(Max.~daily~temp.~(degree*F)))
-   
-```
-
-### Alpha transparency
-
-* Alpha refers to the transparency (1 = solid, 0 = fully transparent)
-* Useful when you've got lots of things stacked on top of each other in a plot
-
-\tiny 
-
-``` {r, echo=T, message=F, fig.width=6, fig.height=2.5, out.width="100%"}
-ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
-  geom_point(alpha = 0.25) + theme(legend.position = "bottom") +
-  geom_smooth() +
-  labs(x = "Solar radiation (Langleys)",
-       y = expression(Max.~daily~temp.~(degree*F)))
-```
-
-### Shape
-
-* Can change point shape to help identify grouping
-* Most useful when there's only a few groups
-
-\tiny
-
-``` {r, echo=T, message=F, fig.width=4, fig.height=2}
-data(mtcars)
-ggplot(data=mtcars, aes(x=wt, y=mpg)) +
-  geom_point(aes(shape=factor(am))) + theme_bw() +
-  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
-  geom_smooth(method = "lm")
-```
-
-### Changing the default options
-
-Many `scale_*` functions allow us to set options for the relevant aesthetic and corresponding legend name, e.g.
-
-* `scale_color_gradient()` makes a color gradient for when we use `aes(color=...)`
-* `scale_fill_brewer()` sets a color palette for `aes(fill=...)` using colour schemes at http://colorbrewer2.org/
-* `scale_shape(name = "Transmission", ...)` changes the title from "factor(am)" to "Transmission" for `aes(shape=factor(am))` in the previous slide
-* `scale_x_log10()` changes the $x$ axis to have a logarithmic scale in increasing powers of 10.
-* Find more at the [`ggplot2` documentation page](http://ggplot2.tidyverse.org/reference/)
 
 ### Changing the default options
 

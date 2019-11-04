@@ -1,7 +1,7 @@
 ---
 title: "Notes on Tufte's principles"
 author: "Sam Clifford"
-date: '2019-10-31'
+date: '2019-11-08'
 citation_package: natbib
 bibliography: extras.bib
 csl: chicago-author-date.csl
@@ -166,5 +166,151 @@ mtcars %>%
     - can compare a main relationship across one or more grouping variables
     - a great way to visualise large quantities of data, or when there are a high number of dimensions
  
+# Aesthetics in ggplot2
 
- 
+## Inheriting aesthetics
+
+In the lecture we show how the following code takes the variables `my.x.variable` and `my.y.variable` from the data frame `my.data.frame`, maps them to the $x$ and $y$ coordinates on a set of axes and then draws the pairs of $x$ and $y$ as points.
+
+``` {r, eval=F, echo=T}
+ggplot(data = my.data.frame, 
+       aes(x = my.x.variable,
+           y = my.y.variable)) +
+  geom_point()
+```
+
+In addition to default settings about how to draw points, the `geom_point()` call has inherited the `x` and `y` aesthetics from the `ggplot()` call that forms the basis of the plot. We could have also written this plot as:
+
+``` {r, eval=F, echo=T}
+ggplot(data = my.data.frame) +
+  geom_point(aes(x = my.x.variable,
+                 y = my.y.variable))
+```
+
+or even
+
+``` {r, eval=F, echo=T}
+ggplot() +
+  geom_point(data = my.data.frame,
+             aes(x = my.x.variable,
+                 y = my.y.variable))
+```
+
+and we get the exact same plot in each case.
+
+However, as we add more and more geometries to our plot it becomes tiresome, and easy to make a mistake, to continue putting the exact same aesthetics in the call for every single geometry. In practice, it's easiest to think about which aesthetics will be common to all (or nearly all) geometries in a plot and put those in the initial `ggplot()` call. Within the geometry we can add additional aesthetic options, e.g.
+
+``` {r, eval=F, echo=T}
+ggplot(data = my.data.frame, 
+       aes(x = my.x.variable,
+           y = my.y.variable)) +
+  geom_point(aes(color = my.color.variable))
+```
+
+or overwrite what is being inherited with something else
+
+``` {r, eval=F, echo=T}
+ggplot(data = my.data.frame, 
+       aes(x = my.x.variable,
+           y = my.y.variable)) +
+  geom_point() +
+  geom_line(aes(y = my.prediction.from.a.linear.model))
+```
+
+## Other plotting aesthetics
+
+We can pass many other arguments in `ggplot2` to change things about the geometries we use to show the $x$ and $y$ variables. If we put these aesthetics outside the `aes()` statement, this will make this option constant for the entire geometry, e.g. `geom_point(color = "red")` will make all of these points red. Alternatively, we can map a variable in the data frame to one of the following aesthestics:
+
+- **group** to repeat geometry for a grouping variable, an alternative to calling `lines()` in base plotting within a loop that subsets the data frame
+- **size** of point or thickness of boundary
+- **shape** of points
+- **colour** of boundary (for most point shapes, the entire point is the boundary)
+- **alpha** transparency
+- **fill** colour of internals of geometry
+
+Below we look at some examples of changing one or more of these.
+
+### Group
+
+Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set
+
+``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width="100%"}
+library(ElemStatLearn)
+data(bone)
+
+ggplot(data = bone, aes(x = age, y = spnbmd)) +
+  geom_point(alpha=0.1) + facet_wrap(~ gender) +
+  geom_line(aes(group = idnum)) +  theme_bw() +
+  labs(x = "Age (years)", y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
+       title = "Relative spinal bone mineral density")
+
+```
+  
+### Colour and fill
+
+
+``` {r, eval=T, echo=T, fig.height=2, fig.width=6, message=F, out.width="100%"}
+ggplot(data = airquality, aes(x = Ozone)) +  
+  geom_histogram(binwidth = 10, boundary = 0,
+                 fill = "lightskyblue", color = "black") +  
+  labs(x = "Ozone concentration (ppb)") +
+  theme_bw() + facet_wrap(~Month, nrow = 1)
+```
+
+### Size and shape
+
+
+``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width="100%"}
+ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
+  geom_point(aes(size = Ozone, shape = factor(Month))) +
+  theme(legend.position = "bottom",
+        legend.box = "vertical") +
+  scale_size_area(name = "Ozone concentration (ppb)") +
+  scale_shape(name = "Month") + 
+  labs(x = "Solar radiation (Langleys)",
+       y = expression(Max.~daily~temp.~(degree*F)))
+   
+```
+
+We must be careful when using shape that we do not choose to use a variable that has so many levels that it becomes too taxing for the reader to tell which is which. Thankfully, ggplot2 gives us some warning when try to do something stupid and use too many.
+
+### Alpha transparency
+
+Alpha refers to the transparency (1 = solid, 0 = fully transparent). This is useful when you've got lots of things stacked on top of each other in a plot and want to make it clear how many of them there are, or you're using an overlay.
+
+``` {r, echo=T, message=F, fig.width=6, fig.height=2.5, out.width="100%"}
+ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
+  geom_point(alpha = 0.25) + theme(legend.position = "bottom") +
+  geom_smooth() +
+  labs(x = "Solar radiation (Langleys)",
+       y = expression(Max.~daily~temp.~(degree*F)))
+```
+
+### Shape
+
+* Can change point shape to help identify grouping
+* Most useful when there's only a few groups
+
+
+``` {r, echo=T, message=F, fig.width=4, fig.height=2}
+data(mtcars)
+ggplot(data=mtcars, aes(x=wt, y=mpg)) +
+  geom_point(aes(shape=factor(am))) + theme_bw() +
+  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
+  geom_smooth(method = "lm")
+```
+
+### Changing the default options
+
+Many `scale_*` functions allow us to set options for the relevant aesthetic and corresponding legend name, e.g.
+
+* `scale_color_gradient()` makes a color gradient for when we use `aes(color=...)`
+* `scale_fill_brewer()` sets a color palette for `aes(fill=...)` using colour schemes at http://colorbrewer2.org/
+* `scale_shape(name = "Transmission", ...)` changes the title from "factor(am)" to "Transmission" for `aes(shape=factor(am))` in the previous slide
+* `scale_x_log10()` changes the $x$ axis to have a logarithmic scale in increasing powers of 10.
+* Find more at the [`ggplot2` documentation page](http://ggplot2.tidyverse.org/reference/)
+
+
+
+
+# References
