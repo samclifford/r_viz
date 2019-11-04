@@ -97,6 +97,37 @@ ggplot(data = my.data.frame,
   geom_point()
 ```
 
+
+### Scatter plot example
+
+* Each row in data has a pair of values $(x,y)$, shown as a point
+
+<!-- * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements) -->
+
+\footnotesize
+
+``` {r, eval=F, echo=T, fig.width=4, fig.height=2}
+data(airquality)
+ggplot(data = airquality,
+       aes(x = Solar.R, y = Temp)) +
+  geom_point() 
+```
+
+### Scatter plot
+
+* We can add some human-friendly labels and change the theme
+
+``` {r, eval=T, echo=F, fig.width=4, fig.height=2}
+ggplot(data = airquality,
+       aes(x = Solar.R, y = Temp)) +
+  geom_point() +
+  labs(x = "Solar radiation (Langleys)",
+       y = "Max. daily temperature (F)") +
+  theme_bw()
+```
+
+
+
 ### Building a plot -- an example
 
 * `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is rate of change in spinal bone mineral density, two successive measurements divided by time between them
@@ -195,38 +226,7 @@ We can keep adding more elements and options to show more details of the data \c
 
 <!-- ``` -->
 
-# Some common geometries
-
-
-### Scatter plot
-
-* Each row in data has a pair of values $(x,y)$, shown as a point
-* Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements)
-
-\footnotesize
-
-``` {r, eval=F, echo=T, fig.width=4, fig.height=2}
-data(airquality)
-ggplot(data = airquality,
-       aes(x = Solar.R, y = Temp)) +
-  geom_point() +
-  labs(x = "Solar radiation (Langleys)",
-       y = "Max. daily temperature (F)") +
-  theme_bw()
-```
-
-### Scatter plot
-
-
-``` {r, eval=T, echo=F, fig.width=4, fig.height=2}
-ggplot(data = airquality,
-       aes(x = Solar.R, y = Temp)) +
-  geom_point() +
-  labs(x = "Solar radiation (Langleys)",
-       y = "Max. daily temperature (F)") +
-  theme_bw()
-```
-
+# Some more geometries
 
 
 ### Line plot
@@ -259,14 +259,14 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 
 * `geom_line()` stops plotting when it hits an `NA` value
 * If we have individual measurements in a group of `NA` values it won't plot that value 
-* Can use multiple geometries to display the same variables
+* Can use multiple geometries to display the same variables - each geometry is a layer in the plot 
 
 \tiny
 
-``` {r, fig.height=1.75, fig.width=4, echo=T}
+``` {r, fig.height=3, fig.width=8, echo=T}
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + geom_point() + theme_bw() +
-  labs(y="Concentration (ppb)",
+  labs(y="Ozone conc. (ppb)",
        title = "Daily mean Ozone in NYC (1973)")
 ```
 
@@ -301,14 +301,7 @@ ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
 
 * **outliers** shown as dots, indicating they're far away from typical values
 
-### Bar/column plots
-
-* Good for showing the amount of something (requires meaningful zero)
-* `geom_col()` - $xy$ plot given some variables `x`, `y`
-* `geom_bar()` - counts number of of times categorical $x$ occurs
-* `geom_histogram()` - counts number of times $x$ in bin
-
-### Bar/column plots
+### Histograms
 
 * e.g. a histogram of Ozone concentrations
 
@@ -323,19 +316,6 @@ ozone_hist <-
 
 ozone_hist
 ```
-
-### Bar/column plots
-
-* e.g. a bar plot of month
-
-\footnotesize
-
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
-ggplot(data = airquality, aes(x = factor(Month))) +  
-  geom_bar() + labs(x = "Month") + theme_bw()
-
-```
-
 
 # Small multiples
 

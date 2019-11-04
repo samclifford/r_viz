@@ -64,37 +64,29 @@ data.frame(Role = c("Chair", "Scribe", "Research", "Programmer", "Critical Frien
 A reminder of expectations in the prac:
 
 * Keep a record of the work being completed, both the R script and this document
-* Allow everyone a chance to participate in the discussion
+* Allow everyone a chance to participate in the learning activities, keeping disruption of other students to a minimum whil still allowing for fruitful discussion
 * All opinions are valued provided they do not harm others
 * Everyone is expected to help out with completing the work, learning seldom occurs solely by watching someone else do work
 
 # Activity 1 - Building an attempt at a plot
 
-We will be looking at a data set of the length and width of the feet of a class of fourth-graders in Ann Arbor, Michigan, collected in October 1997 [@meyer2006]. The experiment was performed to investigate whether boys do indeed have wider feet than girls.
+We will be looking at the gapminder data set as found in the gapminder package [@gapminder]. This data has been collected from countries around the world and contains data on life expectancy, population and GDP per capita for 142 countries from 1952 to 2007.
 
 ``` {r, eval=TRUE}
+library(gapminder)
 library(tidyverse)
-library(mosaicData)
 
-data(KidsFeet)
+data(gapminder)
 ```
 
-**Exercise:** Copy and paste the code below to produce a bar plot that shows how foot length and foot width vary within the class of grade four students.
+**Exercise:** Copy and paste the code below to produce a 
 
 ``` {r, eval=TRUE}
-ggplot(data = KidsFeet, aes(x = name, y = width)) +
-  geom_col(aes(fill = length)) +
-  facet_grid(domhand ~ biggerfoot, 
-             labeller = label_both, 
-             scales = "free_x") +
-  theme_bw() +
-  scale_fill_gradientn(colours = rainbow(5),
-                       name = "Foot length (cm)") +
-  theme(axis.text.x = element_text(angle = 45, size = 6,
-                                   hjust = 1, vjust = 1),
-        legend.position = "bottom") +
-  ylab("Foot width (cm)") +
-  xlab("Student name")
+ggplot(data = gapminder,
+       aes(x = gdpPercap, y = lifeExp)) +
+  geom_path(aes(group = country, color = factor(continent)),
+            size = 1) +
+  scale_color_brewer(palette = "Dark2") + scale_x_log10() + scale_y_log10()
 ```
 
 **Exercise:** Discuss, within your group, what you think is good and bad about this plot. Does it conform to Tufte's principles of graphical excellence? Is it easy to interpret? Does it show the relationship we are interested in? List the three most important improvements that are needed for this graph to be useful.
@@ -111,7 +103,9 @@ ggplot(data = KidsFeet, aes(x = name, y = width)) +
 
 # Activity 2 -- Making a better graph
 
-Based on the ideas discussed, build a graph which your group believes better shows how the relationship between foot length and width varies within the class. You may choose to either modify the code given above or create your own graph from scratch. Make sure your code is written in your script file with appropriate comments.
+Based on the ideas discussed, build a graph which your group believes better shows the relationship between life expectancy and GDP. Think first about what story you want your plot to tell; are you interested in trends over space and/or time? Are you interested in a particular continent or even just one country?
+
+You may choose to either modify the code given above or create your own graph from scratch. Make sure your code is written in your script file with appropriate comments.
 
 Some things you may wish to consider: 
 

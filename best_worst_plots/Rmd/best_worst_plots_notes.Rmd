@@ -1,5 +1,6 @@
 ---
-title: "Notes on Tufte's principles"
+title: "Notes on Tufte's principles and visualisation"
+subtitle: "Statistical computing - 2031"
 author: "Sam Clifford"
 date: '2019-11-08'
 citation_package: natbib
@@ -102,7 +103,9 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   ylab("Fuel efficiency (mpg)") 
 ```
 
-``` {r fig.margin=T, fig.cap="Tufte-compliant boxplot maximising data ink", echo=F, fig.height=2, fig.width=4}
+A lot of the elements of the boxplot can be removed without reducing our ability to distinguish the relevant information.
+
+``` {r fig.margin=T, fig.cap="Tufte's interpretation of a boxplot that maximises data ink", echo=F, fig.height=2, fig.width=4}
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
@@ -125,6 +128,7 @@ If an element of a graph is to be included, it should be because it aids underst
     
 ## Maximising data density
 
+We must ensure that when we are plotting we don't end up with large amounts of white space when avoidable. Small multiples can be attractive, but leaving empty facets leads to unnecessary amounts of white space that reduce the amount of space in the figure dedicated to showing the data in existing combinations of faceting variables.   
    
 ``` {r, echo=F, fig.cap="High dimensional data set with points coloured by number of forward gears and shape mapped to transmission type", fig.margin=T, fig.width=4, fig.height=2.5}
 mtcars %>%
@@ -133,7 +137,10 @@ mtcars %>%
   ggplot(data=., aes(x=factor(cyl),
                     y=mpg)) +
   geom_point(aes(color=factor(gear),
-                 shape=am)) +
+                 group = factor(gear),
+                 shape=am),
+             position = position_dodge(w = 0.25),
+             alpha = 0.5) +
   scale_color_discrete(name="Gears") +
   scale_shape(name="Transmission") +
   theme_bw() +
@@ -150,7 +157,7 @@ mtcars %>%
          vs = c("V", "S")[vs + 1]) %>%
   ggplot(data=., aes(x=factor(cyl),
                     y=mpg)) +
-  geom_point() +
+  geom_point(position = position_jitter(h=0, w=0.1)) +
   facet_grid(am ~ gear) +
   theme_bw() +
   xlab("Number of cylinders") +
@@ -166,6 +173,66 @@ mtcars %>%
     - can compare a main relationship across one or more grouping variables
     - a great way to visualise large quantities of data, or when there are a high number of dimensions
  
+# Additional geometries
+
+### Bar/column plots
+
+Good for showing the amount of something (requires meaningful zero)
+
+* `geom_col()` - $xy$ plot given some variables `x`, `y`
+* `geom_bar()` - counts number of of times categorical $x$ occurs
+* `geom_histogram()` - counts number of times $x$ in bin
+
+
+``` {r, eval=T, echo=T, message=F, fig.width=6, fig.height=4, out.width = "100%"}
+airquality$Date <-  as.Date(paste("1973", 
+                                 airquality$Month,
+                                 airquality$Day,
+                                 sep="-"))
+
+ggplot(data = airquality, aes(x = Date, y = Wind)) +  
+  geom_col() + theme_bw() + 
+  labs(y = "Average wind speed (mph)\nbetween 0700-1000 at LGA airport") 
+
+```
+
+
+``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
+ggplot(data = airquality, aes(x = factor(Month))) +  
+  geom_bar() + labs(x = "Month") + theme_bw()
+
+```
+
+
+``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
+ggplot(data = airquality, aes(x = Ozone)) +  
+  geom_histogram(binwidth = 10, boundary = 0) +  
+  labs(x = "Ozone concentration (ppb)") +
+  theme_bw()
+```
+
+### Lines
+
+The `geom_line()` geometry assumes that the points are ordered from left to right along the $x$ axis. This may not always be the case, and we can instead order by the row in the data frame with `geom_path()`. This may be useful if, for example, we are tracking movement across spatial locations or wish to show the time-ordering of some observations that we would otherwise show in a scatter plot. 
+
+
+``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width="100%"}
+library(amt)
+data(deer)
+
+names(deer) <- c("UTMX", "UTMY", "Time", "burst")
+deer <- subset(deer, deer$burst == 8)
+
+ggplot(data = deer, aes(x=UTMX/1000, y=UTMY/1000)) +
+  geom_path(aes(color = Time)) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  xlab("Eastings (kilometres, EPSG:3035)") +
+  ylab("Northings (kilometres, EPSG:3035)") +
+  ggtitle("Movement of a deer across Northern Germany in 2008")
+
+```
+
 # Aesthetics in ggplot2
 
 ## Inheriting aesthetics
@@ -286,21 +353,8 @@ ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
        y = expression(Max.~daily~temp.~(degree*F)))
 ```
 
-### Shape
 
-* Can change point shape to help identify grouping
-* Most useful when there's only a few groups
-
-
-``` {r, echo=T, message=F, fig.width=4, fig.height=2}
-data(mtcars)
-ggplot(data=mtcars, aes(x=wt, y=mpg)) +
-  geom_point(aes(shape=factor(am))) + theme_bw() +
-  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
-  geom_smooth(method = "lm")
-```
-
-### Changing the default options
+# Changing the default options
 
 Many `scale_*` functions allow us to set options for the relevant aesthetic and corresponding legend name, e.g.
 
@@ -310,7 +364,14 @@ Many `scale_*` functions allow us to set options for the relevant aesthetic and 
 * `scale_x_log10()` changes the $x$ axis to have a logarithmic scale in increasing powers of 10.
 * Find more at the [`ggplot2` documentation page](http://ggplot2.tidyverse.org/reference/)
 
+# Behind the scenes
 
+All geometries provide visual summaries of the data. Sometimes it's a direct plot of the data, such as points and line plots; other times there is a calculation of summary statistics happening behind the scenes. 
 
+For example: a bar plot counts the number of times each level of the categorical variable occurs and then draws uses `geom_col()` to draw the result; a histogram bins the continuous variable values, counts how many observations are in each bin and then draws the columns with no gap between them; a density plot performs a kernel density estimation with automatic bandwidth selection and then draws a ribbon between the estimated density and $x$ axis. 
+
+The boxplot is arguably one of the more complex examples of this as it performs a five number summary and then draws a series of polygons and line segments between the quantiles and then draws the points as outliers.
+
+You can define your own geometries and summary statistic functions, but it's too complex to go into here. For the most part, 
 
 # References
