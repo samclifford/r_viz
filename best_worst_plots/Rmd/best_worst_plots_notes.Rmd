@@ -1,7 +1,7 @@
 ---
 title: "Notes on Tufte's principles and visualisation"
-subtitle: "Statistical computing - 2031"
-author: "Sam Clifford"
+subtitle: 'Statistical computing - 2031'
+author: 'Sam Clifford'
 date: '2019-11-08'
 citation_package: natbib
 bibliography: extras.bib
@@ -20,6 +20,18 @@ library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE, collapse=T, warning=F, message=F, tidy=FALSE, fig.width = 4, fig.height=2)
 ```
 
+# Introduction
+
+Here we provide a little more detail on Tufte's principles and the use of ggplot2 to create effective visualisations.
+
+For further guidance on the use of ggplot2 in R, there are online versions of @changgraphics and @r4ds (specifically chapter 3) as well as the RStudio cheatsheets [@cheatsheets]. The BBC has used ggplot2 to develop an in-house style of data visualisation for their data journalism [@bbcplot].
+
+As always, the code in this document relies on the use of tidyverse.
+
+``` {r eval=FALSE}
+library(tidyverse)
+```
+
 # Tufte's principles for visualising data
 
 ## A quick tour
@@ -34,7 +46,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse=T, warning=F, message=F, tidy=FALSE,
 Visual representations of data must tell the truth
 
 
-``` {r fig.margin=T, echo=F, fig.cap="Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max"}
+``` {r fig.margin=T, echo=F, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max'}
 data(mtcars)
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   geom_point(alpha=0.5) +
@@ -42,10 +54,10 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
                mutate(model=row.names(.)) %>%
                arrange(., mpg) %>%
                filter(mpg %in% range(mpg)), 
-               size=4, alpha=0.5 , pch=1, color="red") +
+               size=4, alpha=0.5 , pch=1, color='red') +
   theme_bw() +
-  xlab("Cylinders") +
-  ylab("Fuel efficiency (mpg)")
+  xlab('Cylinders') +
+  ylab('Fuel efficiency (mpg)')
 ```
 
 1. The visual representation of numbers, as physically measured on the graph, should be directly proportional to the numerical quantities represented
@@ -59,7 +71,7 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 3. Show variation through data, not through design.
 4. Ensure appropriate standardization & comparisons are used, e.g.  CPI-adjusted or seasonally-adjusted.
 
-``` {r fig.margin=T, echo=F, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.", fig.height=4, fig.width=6}
+``` {r fig.margin=T, echo=F, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.\\label{fig:2mpg}", fig.height=4, fig.width=6}
 data(mtcars)
 ggplot(data=mtcars, aes(x=wt, y=mpg)) +
   geom_point(aes(shape=factor(cyl),
@@ -67,18 +79,18 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
               stroke=0, alpha=0.75, size=2) + 
   #facet_wrap( ~ cyl, ncol=1) +
   theme_bw() +
-  theme(legend.position = "right") +
-  scale_shape_discrete(name="Number\nof\ncylinders") +
-  xlab("Weight (1000 lbs)") +
-  ylab("Fuel efficiency (mpg)") + 
-  scale_color_gradient(low = "red",
-                       high="blue",name="Fuel\n efficiency\n (mpg)") +
+  theme(legend.position = 'right') +
+  scale_shape_discrete(name='Number\nof\ncylinders') +
+  xlab('Weight (1000 lbs)') +
+  ylab('Fuel efficiency (mpg)') + 
+  scale_color_gradient(low = 'red',
+                       high='blue',name='Fuel\n efficiency\n (mpg)') +
   guides(col = guide_legend(ncol = 1),
          shape = guide_legend())
 ```
 
 5. The number of information carrying (variable) dimensions depicted should not exceed the number of dimensions in the data.
-    - In practice, this means not mapping the same variable to two graphical elements
+    - In practice, this means not mapping the same variable to two graphical elements (e.g. Figure \ref{fig:2mpg})
 6. Graphics must not quote data out of context.
 
 
@@ -94,27 +106,27 @@ Good graphical representations maximize data-ink and erase as much non-data-ink 
 4. Erase redundant data-ink
 5. Revise and edit
 
-For example, the boxplot is a simple five number summary of a continuous variable that draws multiple rectangles, lines and points to show the quantiles of the data and any outliers [@Frigge1989]. Tufte considers that the outliers are not important in showing the typical spread of the data and that the box is unnecessary as the quantiles are shown with the "whiskers" of the plot and the median line. A standard boxplot from ggplot2 is shown in Figure \ref{fig:ggbox} and a version that removes extraneous lines and points in Figure \ref{fig:tuftebox}.
+For example, the boxplot is a simple five number summary of a continuous variable that draws multiple rectangles, lines and points to show the quantiles of the data and any outliers [@Frigge1989]. Tufte considers that the outliers are not important in showing the typical spread of the data and that the box is unnecessary as the quantiles are shown with the 'whiskers' of the plot and the median line. A standard boxplot from ggplot2 is shown in Figure \ref{fig:ggbox} and a version that removes extraneous lines and points in Figure \ref{fig:tuftebox}.
 
-``` {r fig.margin=T, fig.cap="Standard boxplot\\label{fig:ggbox}", echo=F}
+``` {r fig.margin=T, fig.cap='Standard boxplot\\label{fig:ggbox}', echo=F}
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   geom_boxplot() + theme_bw() +
-  xlab("Number of cylinders") +
-  ylab("Fuel efficiency (mpg)") 
+  xlab('Number of cylinders') +
+  ylab('Fuel efficiency (mpg)') 
 ```
 
 A lot of the elements of the boxplot can be removed without reducing our ability to distinguish the relevant information.
 
-``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=F, fig.height=2, fig.width=4}
+``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=F, fig.height=1.5, fig.width=4}
 
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   geom_tufteboxplot() + theme_tufte() +
-  xlab("Number of\ncylinders") +
-  ylab("Fuel efficiency (mpg)") +
+  xlab('Number of\ncylinders') +
+  ylab('Fuel efficiency (mpg)') +
   coord_flip()
 ```
 
@@ -133,10 +145,10 @@ If an element of a graph is to be included, it should be because it aids underst
 
 We must ensure that when we are plotting we don't end up with large amounts of white space when avoidable. Small multiples can be attractive, but leaving empty facets leads to unnecessary amounts of white space that reduce the amount of space in the figure dedicated to showing the data in existing combinations of faceting variables.   
    
-``` {r, echo=F, fig.cap="High dimensional data set with points coloured by number of forward gears and shape mapped to transmission type", fig.margin=T, fig.width=4, fig.height=2.5}
+``` {r, echo=F, fig.cap='High dimensional data set with points coloured by number of forward gears and shape mapped to transmission type', fig.margin=T, fig.width=4, fig.height=2.5}
 mtcars %>%
-  mutate(am = c("Automatic", "Manual")[am + 1],
-         vs = c("V", "S")[vs + 1]) %>%
+  mutate(am = c('Automatic', 'Manual')[am + 1],
+         vs = c('V', 'S')[vs + 1]) %>%
   ggplot(data=., aes(x=factor(cyl),
                     y=mpg)) +
   geom_point(aes(color=factor(gear),
@@ -144,27 +156,27 @@ mtcars %>%
                  shape=am),
              position = position_dodge(w = 0.25),
              alpha = 0.5) +
-  scale_color_discrete(name="Gears") +
-  scale_shape(name="Transmission") +
+  scale_color_discrete(name='Gears') +
+  scale_shape(name='Transmission') +
   theme_bw() +
   theme(legend.position='right') +
-  xlab("Cylinders") +
-  ylab("Fuel efficiency (mpg)")
+  xlab('Cylinders') +
+  ylab('Fuel efficiency (mpg)')
   
 ```
 
 
-``` {r, echo=F, fig.cap="High dimensional data set with small multiples faceting by number of forward gears and transmission type", fig.margin=T, fig.height=2.5, fig.width=4}
+``` {r, echo=F, fig.cap='High dimensional data set with small multiples faceting by number of forward gears and transmission type', fig.margin=T, fig.height=2.5, fig.width=4}
 mtcars %>%
-  mutate(am = c("Automatic", "Manual")[am + 1],
-         vs = c("V", "S")[vs + 1]) %>%
+  mutate(am = c('Automatic', 'Manual')[am + 1],
+         vs = c('V', 'S')[vs + 1]) %>%
   ggplot(data=., aes(x=factor(cyl),
                     y=mpg)) +
   geom_point(position = position_jitter(h=0, w=0.1)) +
   facet_grid(am ~ gear) +
   theme_bw() +
-  xlab("Number of cylinders") +
-  ylab("Fuel efficiency (mpg)")
+  xlab('Number of cylinders') +
+  ylab('Fuel efficiency (mpg)')
 ```
 
 1. Maximise data density and the amount of data shown, within reason
@@ -187,30 +199,28 @@ Good for showing the amount of something (requires meaningful zero)
 * `geom_histogram()` - counts number of times $x$ in bin
 
 
-``` {r, eval=T, echo=T, message=F, fig.width=6, fig.height=4, out.width = "100%"}
-airquality$Date <-  as.Date(paste("1973", 
-                                 airquality$Month,
-                                 airquality$Day,
-                                 sep="-"))
+``` {r, eval=T, echo=T, message=F, fig.width=6, fig.height=4, out.width = '100%'}
+airquality <- mutate(airquality, 
+                     Date = as.Date(paste('1973', Month, Day, sep='-')))
 
 ggplot(data = airquality, aes(x = Date, y = Wind)) +  
   geom_col() + theme_bw() + 
-  labs(y = "Average wind speed (mph)\nbetween 0700-1000 at LGA airport") 
+  labs(y = 'Average wind speed (mph)\nbetween 0700-1000 at LGA airport') 
 
 ```
 
 
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
+``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = '100%'}
 ggplot(data = airquality, aes(x = factor(Month))) +  
-  geom_bar() + labs(x = "Month") + theme_bw()
+  geom_bar() + labs(x = 'Month') + theme_bw()
 
 ```
 
 
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
+``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = '100%'}
 ggplot(data = airquality, aes(x = Ozone)) +  
   geom_histogram(binwidth = 10, boundary = 0) +  
-  labs(x = "Ozone concentration (ppb)") +
+  labs(x = 'Ozone concentration (ppb)') +
   theme_bw()
 ```
 
@@ -219,20 +229,20 @@ ggplot(data = airquality, aes(x = Ozone)) +
 The `geom_line()` geometry assumes that the points are ordered from left to right along the $x$ axis. This may not always be the case, and we can instead order by the row in the data frame with `geom_path()`. This may be useful if, for example, we are tracking movement across spatial locations or wish to show the time-ordering of some observations that we would otherwise show in a scatter plot. 
 
 
-``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width="100%"}
+``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width='100%'}
 library(amt)
 data(deer)
 
-names(deer) <- c("UTMX", "UTMY", "Time", "burst")
+names(deer) <- c('UTMX', 'UTMY', 'Time', 'burst')
 deer <- subset(deer, deer$burst == 8)
 
 ggplot(data = deer, aes(x=UTMX/1000, y=UTMY/1000)) +
   geom_path(aes(color = Time)) +
   theme_bw() +
-  theme(legend.position = "bottom") +
-  xlab("Eastings (kilometres, EPSG:3035)") +
-  ylab("Northings (kilometres, EPSG:3035)") +
-  ggtitle("Movement of a deer across Northern Germany in 2008")
+  theme(legend.position = 'bottom') +
+  xlab('Eastings (kilometres, EPSG:3035)') +
+  ylab('Northings (kilometres, EPSG:3035)') +
+  ggtitle('Movement of a deer across Northern Germany in 2008')
 
 ```
 
@@ -289,7 +299,7 @@ ggplot(data = my.data.frame,
 
 ## Other plotting aesthetics
 
-We can pass many other arguments in `ggplot2` to change things about the geometries we use to show the $x$ and $y$ variables. If we put these aesthetics outside the `aes()` statement, this will make this option constant for the entire geometry, e.g. `geom_point(color = "red")` will make all of these points red. Alternatively, we can map a variable in the data frame to one of the following aesthestics:
+We can pass many other arguments in `ggplot2` to change things about the geometries we use to show the $x$ and $y$ variables. If we put these aesthetics outside the `aes()` statement, this will make this option constant for the entire geometry, e.g. `geom_point(color = 'red')` will make all of these points red. Alternatively, we can map a variable in the data frame to one of the following aesthestics:
 
 - **group** to repeat geometry for a grouping variable, an alternative to calling `lines()` in base plotting within a loop that subsets the data frame
 - **size** of point or thickness of boundary
@@ -302,42 +312,45 @@ Below we look at some examples of changing one or more of these.
 
 ### Group
 
-Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set
+Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set such as the `r nrow(count(ElemStatLearn::bone, idnum))` participants in the spinal bone density data set in Figure \ref{fig:spnbmd}.
 
-``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width="100%"}
+``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width='100%', fig.cap = "Rate of change of spinal bone mineral density\\label{fig:spnbmd}"}
 library(ElemStatLearn)
 data(bone)
 
 ggplot(data = bone, aes(x = age, y = spnbmd)) +
   geom_point(alpha=0.1) + facet_wrap(~ gender) +
   geom_line(aes(group = idnum)) +  theme_bw() +
-  labs(x = "Age (years)", y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
-       title = "Relative spinal bone mineral density")
+  labs(x = 'Age (years)', y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
+       title = 'Relative spinal bone mineral density')
 
 ```
   
 ### Colour and fill
 
+We can set the colour common to all instances of the geometry by setting it constant, outside the `aes()` statement and then set the fill to vary according to some variable, e.g. Figure \ref{fig:fill} shows how common each range of ozone concentration is (bins of width 10ppb) and which months those observations were measured in.
 
-``` {r, eval=T, echo=T, fig.height=2, fig.width=6, message=F, out.width="100%"}
+``` {r, eval=T, echo=T, fig.height=3, fig.width=6, message=F, out.width='100%', fig.cap = "\\label{fig:fill}Histogram bars stacked and coloured by month"}
 ggplot(data = airquality, aes(x = Ozone)) +  
   geom_histogram(binwidth = 10, boundary = 0,
-                 fill = "lightskyblue", color = "black") +  
-  labs(x = "Ozone concentration (ppb)") +
-  theme_bw() + facet_wrap(~Month, nrow = 1)
+                 color = 'black',
+                 aes(fill = factor(Month))) +  
+  labs(x = 'Ozone concentration (ppb)') +
+  theme_bw() + 
+  scale_fill_viridis_d(name = 'Month')
 ```
 
 ### Size and shape
 
 
-``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width="100%"}
+``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width='100%'}
 ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
   geom_point(aes(size = Ozone, shape = factor(Month))) +
-  theme(legend.position = "bottom",
-        legend.box = "vertical") +
-  scale_size_area(name = "Ozone concentration (ppb)") +
-  scale_shape(name = "Month") + 
-  labs(x = "Solar radiation (Langleys)",
+  theme(legend.position = 'bottom',
+        legend.box = 'vertical') +
+  scale_size_area(name = 'Ozone concentration (ppb)') +
+  scale_shape(name = 'Month') + 
+  labs(x = 'Solar radiation (Langleys)',
        y = expression(Max.~daily~temp.~(degree*F)))
    
 ```
@@ -348,11 +361,11 @@ We must be careful when using shape that we do not choose to use a variable that
 
 Alpha refers to the transparency (1 = solid, 0 = fully transparent). This is useful when you've got lots of things stacked on top of each other in a plot and want to make it clear how many of them there are, or you're using an overlay.
 
-``` {r, echo=T, message=F, fig.width=6, fig.height=2.5, out.width="100%"}
+``` {r, echo=T, message=F, fig.width=6, fig.height=2.5, out.width='100%'}
 ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
-  geom_point(alpha = 0.25) + theme(legend.position = "bottom") +
+  geom_point(alpha = 0.25) + theme(legend.position = 'bottom') +
   geom_smooth() +
-  labs(x = "Solar radiation (Langleys)",
+  labs(x = 'Solar radiation (Langleys)',
        y = expression(Max.~daily~temp.~(degree*F)))
 ```
 
@@ -363,7 +376,7 @@ Many `scale_*` functions allow us to set options for the relevant aesthetic and 
 
 * `scale_color_gradient()` makes a color gradient for when we use `aes(color=...)`
 * `scale_fill_brewer()` sets a color palette for `aes(fill=...)` using colour schemes at http://colorbrewer2.org/
-* `scale_shape(name = "Transmission", ...)` changes the title from "factor(am)" to "Transmission" for `aes(shape=factor(am))` in the previous slide
+* `scale_shape(name = 'Transmission', ...)` changes the title from 'factor(am)' to 'Transmission' for `aes(shape=factor(am))` in the previous slide
 * `scale_x_log10()` changes the $x$ axis to have a logarithmic scale in increasing powers of 10.
 * Find more at the [`ggplot2` documentation page](http://ggplot2.tidyverse.org/reference/)
 
@@ -375,6 +388,8 @@ For example: a bar plot counts the number of times each level of the categorical
 
 The boxplot is arguably one of the more complex examples of this as it performs a five number summary and then draws a series of polygons and line segments between the quantiles and then draws the points as outliers.
 
-You can define your own geometries and summary statistic functions, but it's too complex to go into here. For the most part, 
+You can define your own geometries and summary statistic functions [@ggextend], but it's too complex to go into here. For the most part, the exploratory data analysis and model visualisation you'll be doing is able to be performed using the built-in geometries. 
 
 # References
+
+\footnotesize
