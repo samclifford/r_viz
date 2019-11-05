@@ -94,7 +94,9 @@ Good graphical representations maximize data-ink and erase as much non-data-ink 
 4. Erase redundant data-ink
 5. Revise and edit
 
-``` {r fig.margin=T, fig.cap="Standard boxplot", echo=F}
+For example, the boxplot is a simple five number summary of a continuous variable that draws multiple rectangles, lines and points to show the quantiles of the data and any outliers [@Frigge1989]. Tufte considers that the outliers are not important in showing the typical spread of the data and that the box is unnecessary as the quantiles are shown with the "whiskers" of the plot and the median line. A standard boxplot from ggplot2 is shown in Figure \ref{fig:ggbox} and a version that removes extraneous lines and points in Figure \ref{fig:tuftebox}.
+
+``` {r fig.margin=T, fig.cap="Standard boxplot\\label{fig:ggbox}", echo=F}
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
@@ -105,7 +107,8 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 
 A lot of the elements of the boxplot can be removed without reducing our ability to distinguish the relevant information.
 
-``` {r fig.margin=T, fig.cap="Tufte's interpretation of a boxplot that maximises data ink", echo=F, fig.height=2, fig.width=4}
+``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=F, fig.height=2, fig.width=4}
+
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
