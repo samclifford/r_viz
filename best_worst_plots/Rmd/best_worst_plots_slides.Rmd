@@ -1,14 +1,13 @@
 ---
-title: "Visualisation with ggplot2"
-subtitle: "2031 - Statistical Computing"
-author: "Sam Clifford"
-date: "2019-11-08"
+title: 'Visualisation with ggplot2'
+subtitle: '2031 - Statistical Computing'
+author: 'Sam Clifford'
+date: '2019-11-08'
 output:
   beamer_presentation:
     keep_tex: true
-    theme: "Hannover"
-    colortheme: "dove"
-    fonttheme: "professionalfonts"
+    theme: 'Hannover'
+    colortheme: 'dove'
     latex_engine: xelatex
     citation_package: natbib
     includes: 
@@ -22,13 +21,17 @@ bibliography: extras.bib
   
 ```{r global_options, include=FALSE}
 library(knitr)
+opts_knit$get('out.format')
+knit_patterns$set(all_patterns[['rnw']])
+
 library(tidyverse)
 library(ggthemes)
 
-output <- opts_knit$get("rmarkdown.pandoc.to")
+output <- opts_knit$get('rmarkdown.pandoc.to')
 knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
-                      fig.align="center", out.width = "100%",
+                      fig.align='center', out.width = '100%',
                       fig.width=4,  fig.height=2)
+
 ```
 
 # Principles of graphical excellence
@@ -80,17 +83,18 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
     - choose a geometry for how to display these variables
     - adjustments to axis scales
     - adjustments to colors, themes, etc.
-    - adding extra commands in a "do this, then do this" manner
+    - adding extra commands in a 'do this, then do this' manner
   
-### Building a plot
+### Building plots
 
 * How do we structure a call to `ggplot` to make a plot?
-    - load `ggplot2` package
+    - load ggplot2 package
     - Specify we want a `ggplot` object and which data frame we're going to use, 
     - set **aesthetic options** to tell R which variables to map to the $x$ and $y$ axes of the plot
     - state geometry we're using to show variables
     
 ``` {r, eval=F, echo=T}
+library(ggplot2)
 ggplot(data = my.data.frame, 
        aes(x = my.x.variable,
            y = my.y.variable)) +
@@ -98,15 +102,16 @@ ggplot(data = my.data.frame,
 ```
 
 
-### Scatter plot example
+### Building plots
 
+* For example, consider a scatter plot of daily maximum temperature varying with solar radiation in New York City 1973
 * Each row in data has a pair of values $(x,y)$, shown as a point
 
 <!-- * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements) -->
 
 \footnotesize
 
-``` {r, eval=F, echo=T, fig.width=4, fig.height=2}
+``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
 data(airquality)
 ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
@@ -117,12 +122,14 @@ ggplot(data = airquality,
 
 * We can add some human-friendly labels and change the theme
 
-``` {r, eval=T, echo=F, fig.width=4, fig.height=2}
+\footnotesize
+
+``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
 ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
   geom_point() +
-  labs(x = "Solar radiation (Langleys)",
-       y = "Max. daily temperature (F)") +
+  labs(x = 'Solar radiation (Langleys)',
+       y = 'Max. daily temp. (F)') +
   theme_bw()
 ```
 
@@ -152,7 +159,7 @@ ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point()
 ggplot(data = bone,
        aes(x = age, y = spnbmd)) +
   geom_point() +
-  labs(x = "Age (years)",
+  labs(x = 'Age (years)',
     y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) +
   theme_bw()
 ```
@@ -185,16 +192,16 @@ ggplot(data = bone,
             aes(group = idnum), alpha = 0.05) +
   facet_wrap(~ gender) +
   theme_bw() +
-  geom_line(data=bone, stat="smooth",
+  geom_line(data=bone, stat='smooth',
               alpha = 0.25,
-              #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") +
-              method="loess", color="blue",
+              #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') +
+              method='loess', color='blue',
             size=1.5) +
   labs(
-    x = "Age (years)",
+    x = 'Age (years)',
     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))),
-    title = "Relative spinal bone mineral density"#,
-    #caption = "Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12"
+    title = 'Relative spinal bone mineral density'#,
+    #caption = 'Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12'
   )
 
 ```
@@ -203,9 +210,9 @@ We can keep adding more elements and options to show more details of the data \c
 
 <!-- ### Presentation of plots -->
 
-<!-- ``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap="Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12", res=300} -->
+<!-- ``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap='Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12', res=300} -->
 
-<!-- #png(width = 6, height = 3, filename = "fancy_2.png", units = "in", res = 300) -->
+<!-- #png(width = 6, height = 3, filename = 'fancy_2.png', units = 'in', res = 300) -->
 <!-- ggplot(data = bone, -->
 <!--        aes(x = age, y = spnbmd)) + -->
 <!--   geom_point(alpha = 0.125, stroke=0, pch=19, -->
@@ -214,13 +221,13 @@ We can keep adding more elements and options to show more details of the data \c
 <!--             aes(group = idnum), alpha = 0.05) + -->
 <!--   facet_wrap(~ gender) + -->
 <!--   theme_bw() + -->
-<!--   geom_line(data=bone, stat="smooth", -->
+<!--   geom_line(data=bone, stat='smooth', -->
 <!--               alpha = 0.25, -->
-<!--               #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") + -->
-<!--               method="loess", color="blue", -->
+<!--               #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') + -->
+<!--               method='loess', color='blue', -->
 <!--             size=1.5) + -->
 <!--   labs( -->
-<!--     x = "Age (years)", -->
+<!--     x = 'Age (years)', -->
 <!--     #y = expression(Rel.~Bone~Mineral\\n~Density~(g ~ cm ^ {-3}~yr^{-1}))) -->
 <!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1})))) -->
 
@@ -242,17 +249,16 @@ We can keep adding more elements and options to show more details of the data \c
 
 \tiny
 
-``` {r, fig.height=1.75, fig.width=4, echo=T}
+``` {r, fig.height=3, fig.width=8, echo=T}
 # make the date column
-airquality$Date <- as.Date(paste("1973", 
-                                 airquality$Month,
-                                 airquality$Day,
-                                 sep="-"))
+library(data.table)
+airquality <- data.table(airquality)
+airquality[, Date := as.Date(paste('1973', Month, Day, sep = '-'))]
 
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + theme_bw() +
-  labs(y="Concentration (ppb)",
-       title = "Daily mean Ozone in NYC (1973)")
+  labs(y='Ozone concentration (ppb)',
+       title = 'Daily mean Ozone in NYC (1973)')
 ```
 
 ### Line plot
@@ -266,8 +272,8 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 ``` {r, fig.height=3, fig.width=8, echo=T}
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + geom_point() + theme_bw() +
-  labs(y="Ozone conc. (ppb)",
-       title = "Daily mean Ozone in NYC (1973)")
+  labs(y='Ozone concentration (ppb)',
+       title = 'Daily mean Ozone in NYC (1973)')
 ```
 
 
@@ -282,7 +288,7 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 ``` {r, echo=T, message=F, fig.width=4, fig.height=2}
 ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
   geom_point() + geom_smooth() + theme_bw() +
-  labs(x=expression(Temperature~(degree*F)), y="Ozone (ppb)")
+  labs(x=expression(Temperature~(degree*F)), y='Ozone (ppb)')
 ```
 
 
@@ -294,7 +300,7 @@ ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
 
 ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
   geom_boxplot() + theme_bw() +
-  labs(y = "Ozone conc. (ppb)", x = "Month")
+  labs(y = 'Ozone conc. (ppb)', x = 'Month')
 ```
 
 \normalsize
@@ -311,7 +317,7 @@ ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
 ozone_hist <-
   ggplot(data = airquality, aes(x = Ozone)) +  
   geom_histogram(binwidth = 10, boundary = 0) +  
-  labs(x = "Ozone concentration (ppb)") +
+  labs(x = 'Ozone concentration (ppb)') +
   theme_bw()
 
 ozone_hist
@@ -348,7 +354,7 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 
 
 
-``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = "100%"}
+``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%'}
 library(mosaicData)
 library(data.table)
 
@@ -360,17 +366,19 @@ Weather_summarised <-
   Weather[ , 
            lapply(.SD, mean),
            by = .(city, month, year),
-           .SDcols = patterns("temp")]
+           .SDcols = patterns('temp')]
 
 Weather_plot <-
   ggplot(data = Weather_summarised, aes(x = month, y = avg_temp)) +
   geom_line() +
   geom_ribbon(aes(ymin = low_temp, ymax = high_temp), alpha = 0.25) +
   theme_bw() +
-  xlab("Month") + ylab(expression(Temperature~(degree*F))) +
-  ggtitle("Monthly average of daily mean, min and max temperatures") +
+  xlab('Month') + ylab(expression(Temperature~(degree*F))) +
+  ggtitle('Monthly average of daily mean, min and max temperatures') +
   facet_grid(rows = vars(year), cols = vars(city)) +
-  scale_x_continuous(breaks = seq(1, 12, by = 3))
+  scale_x_continuous(breaks = seq(1, 12, by = 3), 
+                     minor_breaks = seq(1, 12), 
+                     labels = function(x){month.abb[x]})
 
 ```
 
@@ -379,27 +387,12 @@ Weather_plot <-
 
 
 
-``` {r, fig.height=3, fig.width=6, eval=T, echo=F, out.width="100%"}
+``` {r, fig.height=3, fig.width=6, eval=T, echo=F, out.width='100%'}
 Weather_plot
 ```
 
 
 
-### Changing the default options
-
-\tiny
-
-``` {r, echo=T, message=F, fig.width=6, fig.height=3, out.width="100%"}
-ggplot(data=mtcars, aes(x=wt, y=mpg)) +
-  geom_point(alpha=0.75, aes(shape=factor(am), color = factor(cyl),
-                             size=factor(gear))) + theme_bw() +
-  scale_shape(name="Transmission", breaks=c("0", "1"),
-              labels=c("Auto", "Manual")) +
-  scale_size_discrete(name="Gears") +
-  scale_color_brewer(name="Cylinders", palette = "Pastel2") +
-  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
-  geom_smooth(method = "loess", se=FALSE, color = "black")
-```
 
 
 # Summary
@@ -411,7 +404,7 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
 * Plots are built from
     - geometric objects
     - axis scales
-    - coordinate systems (linear scale, logarithmic scale, 2D, 3D, etc.)
+    - coordinate systems (linear or logarithmic scale, 2D, 3D, etc.)
     - annotations (e.g. heading in small multiples)
 
     
@@ -420,17 +413,35 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
 * Successively building a plot with a grammar of graphics allows development of complex plots from simple elements and small changes
 * Choose a plotting geometry that helps tell the story
 * Meaningful labels remove ambiguity and confusion
+* Be careful not to put too much in
+
+### 
+
+\tiny
+
+``` {r, echo=T, message=F, fig.width=8, fig.height=4, out.width='100%'}
+ggplot(data=mtcars, aes(x=wt, y=mpg)) +
+  geom_point(alpha=0.75, aes(shape = factor(am, levels = c(0,1),
+                                            labels = c('Auto', 'Manual')),
+                             color = factor(cyl),
+                             size  = factor(gear))) + theme_bw() +
+  scale_shape(name = 'Transmission') +
+  scale_size_discrete(name = 'Gears') +
+  scale_color_brewer(name='Cylinders', palette = 'Pastel2') +
+  xlab('Weight (1000lbs)') + ylab('Fuel efficiency (mpg)') +
+  geom_smooth(method = 'loess', se=FALSE, color = 'black')
+```
+
 
 ### Further reading
 
 * Extra notes on Tufte's principles
 * History of visualisation
-    - @Friendly:05:gfkl
-    - @Friendly:06:hbook
+    - \citet{Friendly:05:gfkl}
+    - \citet{Friendly:06:hbook}
 * Visualisation to help decision making
     - @visstatthink1997
 * ggplot2 resources
     - @layered-grammar
     - @cheatsheets
 
-\scriptsize

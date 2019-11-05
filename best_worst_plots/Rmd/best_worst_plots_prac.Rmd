@@ -1,27 +1,30 @@
 ---
-title: "Visualisation"
-subtitle: "It was the best of plots, it was the worst of plots"
-author: "Sam Clifford"
-date: "2019-10-31"
+title: 'Visualisation'
+author: 'Sam Clifford'
+date: '2019-11-08'
+output: 
+  pdf_document:
+    includes:
+      in_header: matrix.tex
 citation_package: natbib
-bibliography: extras.bib
 csl: chicago-author-date.csl
-output: word_document
+subtitle: 2031 - Statistical Computing
+bibliography: extras.bib
 ---
 
 
 ```{r setup, include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, eval=FALSE,
-                      fig.align="center", dpi = 300)
+                      fig.align='center', dpi = 300)
 library(tidyverse)
 ```
 
 # Introduction
 
-## About this workshop
+## About this practical session
 
-In the lecture we introduced visualisation with the histogram, $x$-$y$ plots and other scatter plot techniques, and touched on Tufte's principles of graphical excellence.
+In the lecture session we introduced visualisation with the histogram, $x$-$y$ plots and other scatter plot techniques, and touched on Tufte's principles of graphical excellence.
 
 This prac will investigate the visual display of data and what makes a good and a bad graph.
 
@@ -36,70 +39,69 @@ This prac will investigate the visual display of data and what makes a good and 
 * Professional skills
     - Creating high quality graphics
 
-<!-- ## Group formation -->
+## Group formation
 
-<!-- Organise yourselves into groups of 4-6 students to collaboratively solve the following workshop problems. -->
+Organise yourselves into groups of 2-3 students to collaboratively solve the following exercises.
 
 <!-- Assign the following roles. Someone may need to take on multiple roles or you may need to split a role depending on the size of your group. -->
 
-``` {r, echo=FALSE, results="asis", fig.align="center", eval=FALSE, fig.width=7, fig.height=5, fig.align = "center", out.width = "100%"}
+``` {r, echo=FALSE, results='asis', fig.align='center', eval=FALSE, fig.width=7, fig.height=5, fig.align = 'center', out.width = '100%'}
 library(pander)
 panderOptions('table.alignment.default', 'center')
-data.frame(Role = c("Chair", "Scribe", "Research", "Programmer", "Critical Friend", "Spokesperson"),
-           Duties = c("Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute",
-                      "Responsible for recording answers in this worksheet",
-                      "Has the slides ready and able to fetch other relevant information online",
-                      "Drives R with the support of the group",
-                      "Constructive criticism, is the group answering the question?",
-                      "Presentation of discussion points to class")) %>%
-  mutate(Name = rep("Student Name", nrow(.)),
-         Email = rep("Student Email", nrow(.))) %>%
-  pandoc.table(justify=rep("left", ncol(.)),
+data.frame(Role = c('Chair', 'Scribe', 'Research', 'Programmer', 'Critical Friend', 'Spokesperson'),
+           Duties = c('Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute',
+                      'Responsible for recording answers in this worksheet',
+                      'Has the slides ready and able to fetch other relevant information online',
+                      'Drives R with the support of the group',
+                      'Constructive criticism, is the group answering the question?',
+                      'Presentation of discussion points to class')) %>%
+  mutate(Name = rep('Student Name', nrow(.)),
+         Email = rep('Student Email', nrow(.))) %>%
+  pandoc.table(justify=rep('left', ncol(.)),
                graph.boxes=TRUE, table.split.table= Inf,
-               style="multiline", keep.line.breaks = TRUE,
-               split.cells = c("20%", "30%", "20%", "30%"))
+               style='multiline', keep.line.breaks = TRUE,
+               split.cells = c('20%', '30%', '20%', '30%'))
 
 ```
 
 A reminder of expectations in the prac:
 
-* Keep a record of the work being completed, both the R script and this document
-* Allow everyone a chance to participate in the learning activities, keeping disruption of other students to a minimum whil still allowing for fruitful discussion
+* Keep a record of the work being completed with a well-commented R script
+* Allow everyone a chance to participate in the learning activities, keeping disruption of other students to a minimum while still allowing for fruitful discussion
 * All opinions are valued provided they do not harm others
-* Everyone is expected to help out with completing the work, learning seldom occurs solely by watching someone else do work
+* Everyone is expected to do the work, learning seldom occurs solely by watching someone else do work
 
 # Activity 1 - Building an attempt at a plot
 
 We will be looking at the gapminder data set as found in the gapminder package [@gapminder]. This data has been collected from countries around the world and contains data on life expectancy, population and GDP per capita for 142 countries from 1952 to 2007.
 
-``` {r, eval=TRUE}
+**Exercise:** Copy and paste the code below to produce a plot showing how the relationship between GDP, life expectancy and population vary over time and continent.
+
+\small
+
+``` {r, eval=TRUE, fig.width = 8, fig.height = 3}
 library(gapminder)
 library(tidyverse)
-
 data(gapminder)
-```
 
-**Exercise:** Copy and paste the code below to produce a 
-
-``` {r, eval=TRUE}
 ggplot(data = gapminder,
        aes(x = gdpPercap, y = lifeExp)) +
-  geom_path(aes(group = country, color = factor(continent)),
-            size = 1) +
-  scale_color_brewer(palette = "Dark2") + scale_x_log10() + scale_y_log10()
+  geom_path(aes(group = country, color = continent)) +
+  geom_point(aes(color = continent, size = pop)) +
+  scale_color_brewer(palette = 'Dark2') + scale_x_log10() +
+  annotation_logticks(sides = 'b') + 
+  facet_wrap( ~ continent, scales = 'free', nrow = 1) +
+  scale_size_area() +
+  theme(legend.position = 'bottom',
+        legend.box = 'vertical')
+
 ```
 
-**Exercise:** Discuss, within your group, what you think is good and bad about this plot. Does it conform to Tufte's principles of graphical excellence? Is it easy to interpret? Does it show the relationship we are interested in? List the three most important improvements that are needed for this graph to be useful.
+\normalsize
 
-**Answer:**
+**Exercise:** Discuss, within your group, what you think is good and bad about this plot. Does it conform to Tufte's principles of graphical excellence? Is it easy to interpret? Does it show the relationship we are interested in? List *three* important improvements that are needed for this graph to be useful.
 
-1. ...
-2. ...
-3. ...
-
-**Exercise:** As a group, discuss what you think each line of code in the above block does. You may wish to answer here or leave comments in your code (everything after a `#` is a comment)
-
-**Answer:**
+**Exercise:** As a group, discuss what you think each line of code in the above block does. You may wish to answer as comments in your code (everything after a `#` is a comment) or in a separate document.
 
 # Activity 2 -- Making a better graph
 
@@ -119,32 +121,15 @@ You may wish to sketch the graph by hand before attempting to write the R code t
 
 If you get stuck, look at the [ggplot2](https://ggplot2.tidyverse.org/reference/) documentation or ask a tutor. 
 
-**Exercise:** What changes did you make to improve the graph?
-
-**Answer:**
-
-1. ...
-2. ...
-3. ...
-
-**Delete this text and include your plot here.**
+**Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
 
 # Activity 3 -- Making a worse graph
 
-Make a new graph as in the previous activity but make it as bad as possible while still attempting to honestly show the information (i.e. don't add things to the plot which can't be derived from the variables in the plot. 
+Make a new graph as in the previous activity but make it as bad as possible while still attempting to honestly show the information (i.e. don't add things to the plot which can't be derived from the variables in the plot). 
 
-What are the principles of graphical excellence and how can we go against them to make a truly terrible plot? Think about what was bad about the bar plot provided earlier. Consider abusing the ability to map graphical options (e.g. color, fill, line type, point size) to our variables of interest.
+Consider the principles of graphical excellence and how can we go against them to make a truly terrible plot. Think about what was bad about the plot provided earlier. Consider abusing the ability to map graphical options (e.g. color, fill, line type, point size) to our variables of interest.
 
-**Exercise:** What changes did you make to make the graph worse?
-
-**Answer:**
-
-1. ...
-2. ...
-3. ...
-
-**Delete this text and include your plot here.**
-
+**Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
 
 # Activity 4 -- Group discussion
 
@@ -152,7 +137,7 @@ Have participants present their best (and/or worst) graph from the last activiti
 
 # Tidy up
 
-Make sure you save this Word document, your R script, and any graphs you have produced and email them to the entire group. Restart your CoW when you are finished, put the chairs back neatly around the desk, leaving the room in a better condition than you found it. Email your worst graph to [Dr Sam Clifford](mailto:sam.clifford@lshtm.ac.uk).
+Make sure you save your R script, and anything else you have produced and ensure everyone in your group has a copy. Email your worst graph to [Dr Sam Clifford](mailto:sam.clifford@lshtm.ac.uk). Leave the room in a better condition than you found it. 
 
 # Further reading
 
@@ -161,3 +146,7 @@ A lot of the key ideas in data visualisation arose with @tufte, and are summaris
 Some of the history of data visualisation is summarised well by @Friendly:05:gfkl and @Friendly:06:hbook.
 
 For some more guidance on using `ggplot2` for data visualisation, check Chapter 3 of @r4ds, the RStudio cheatsheets [@cheatsheets], and @changgraphics.
+
+# References
+
+\footnotesize
