@@ -135,78 +135,79 @@ ggplot(data = airquality,
 
 
 
-### Building a plot -- an example
+<!-- ### Building a plot -- an example -->
 
-* `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is rate of change in spinal bone mineral density, two successive measurements divided by time between them
+<!-- * `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is rate of change in spinal bone mineral density, two successive measurements divided by time between them -->
 
-\tiny
+<!-- \tiny -->
 
-``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
-library(ElemStatLearn)
-library(ggplot2)
+<!-- ``` {r, eval=T, echo=T, fig.width=4, fig.height=2} -->
+<!-- library(ElemStatLearn) -->
+<!-- library(ggplot2) -->
 
-ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point()
-```
-
-
-### Building a plot -- an example
-
-* This should probably have some meaningful axis labels and we can use a nicer looking theme
-
-\tiny
-
-``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
-ggplot(data = bone,
-       aes(x = age, y = spnbmd)) +
-  geom_point() +
-  labs(x = 'Age (years)',
-    y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) +
-  theme_bw()
-```
+<!-- ggplot(data = bone, aes(x = age, y = spnbmd)) + geom_point() -->
+<!-- ``` -->
 
 
-### Building a plot -- an example
+<!-- ### Building a plot -- an example -->
 
-``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4}
-library(dplyr)
-library(stringi)
-library(magrittr)
+<!-- * This should probably have some meaningful axis labels and we can use a nicer looking theme -->
 
-bone %<>%
-  count(idnum) %>%
-  inner_join(bone) %>%
-  mutate(gender = stri_trans_totitle(gender))
+<!-- \tiny -->
 
-bone.singleton <- bone %>%
-  filter(n==1)
+<!-- ``` {r, eval=T, echo=T, fig.width=4, fig.height=2} -->
+<!-- ggplot(data = bone, -->
+<!--        aes(x = age, y = spnbmd)) + -->
+<!--   geom_point() + -->
+<!--   labs(x = 'Age (years)', -->
+<!--     y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) + -->
+<!--   theme_bw() -->
+<!-- ``` -->
 
-bone.repeats <- bone %>%
-  group_by(idnum) %>%
-  filter(n > 1)
 
-ggplot(data = bone,
-       aes(x = age, y = spnbmd)) +
-  geom_point(alpha = 0.125, stroke=0, pch=19,
-             size=0.75) +
-  geom_line(data=bone.repeats,
-            aes(group = idnum), alpha = 0.05) +
-  facet_wrap(~ gender) +
-  theme_bw() +
-  geom_line(data=bone, stat='smooth',
-              alpha = 0.25,
-              #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') +
-              method='loess', color='blue',
-            size=1.5) +
-  labs(
-    x = 'Age (years)',
-    y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))),
-    title = 'Relative spinal bone mineral density'#,
-    #caption = 'Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12'
-  )
+<!-- ### Building a plot -- an example -->
 
-```
+<!-- ``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4} -->
+<!-- library(dplyr) -->
+<!-- library(stringi) -->
+<!-- library(magrittr) -->
 
-We can keep adding more elements and options to show more details of the data \citep{layered-grammar, cheatsheets}
+<!-- bone %<>% -->
+<!--   count(idnum) %>% -->
+<!--   inner_join(bone) %>% -->
+<!--   mutate(gender = stri_trans_totitle(gender)) -->
+
+<!-- bone.singleton <- bone %>% -->
+<!--   filter(n==1) -->
+
+<!-- bone.repeats <- bone %>% -->
+<!--   group_by(idnum) %>% -->
+<!--   filter(n > 1) -->
+
+<!-- ggplot(data = bone, -->
+<!--        aes(x = age, y = spnbmd)) + -->
+<!--   geom_point(alpha = 0.125, stroke=0, pch=19, -->
+<!--              size=0.75) + -->
+<!--   geom_line(data=bone.repeats, -->
+<!--             aes(group = idnum), alpha = 0.05) + -->
+<!--   facet_wrap(~ gender) + -->
+<!--   theme_bw() + -->
+<!--   geom_line(data=bone, stat='smooth', -->
+<!--               alpha = 0.25, -->
+<!--               #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') + -->
+<!--               method='loess', color='blue', -->
+<!--             size=1.5) + -->
+<!--   labs( -->
+<!--     x = 'Age (years)', -->
+<!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))), -->
+<!--     title = 'Relative spinal bone mineral density'#, -->
+<!--     #caption = 'Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12' -->
+<!--   ) -->
+
+<!-- ``` -->
+
+<!-- We can keep adding more elements and options to show more details of the data \citep{layered-grammar, cheatsheets} -->
+
 
 <!-- ### Presentation of plots -->
 
@@ -323,6 +324,35 @@ ozone_hist <-
 ozone_hist
 ```
 
+# Aesthetics
+
+### Aesthetics
+
+* The $x$ and $y$ positions are the simplest aesthetic options we've seen
+* We can also map the following options to variables 
+    - **size** of point or thickness of boundary
+    - **shape** of points
+    - **colour** of boundary
+    - **alpha** transparency
+    - **fill** colour of internals of geometry
+    - **group** to repeat geometry for each subset of the data corresponding to the grouping variable
+    
+* We can also put these (except group) *outside* `aes()` to set the value for all parts of that geometry
+
+### Aesthetics
+
+\tiny
+
+``` {r, eval=T, echo=T, fig.height=2, fig.width=4, message=F}
+ggplot(data = airquality, aes(x = Ozone)) +  
+  geom_histogram(binwidth = 10, boundary = 0,
+                 color = 'black',
+                 aes(fill = factor(Month))) +  
+  labs(x = 'Ozone concentration (ppb)') +
+  theme_bw() + 
+  scale_fill_viridis_d(name = 'Month')
+```
+
 # Small multiples
 
 ### Small multiples
@@ -410,7 +440,7 @@ Weather_plot
     
 ### Summary
 
-* Successively building a plot with a grammar of graphics allows development of complex plots from simple elements and small changes
+* Successively building a plot with a grammar of graphics allows development of complex plots from simple elements and small changes \citep{layered-grammar, cheatsheets}
 * Choose a plotting geometry that helps tell the story
 * Meaningful labels remove ambiguity and confusion
 * Be careful not to put too much in

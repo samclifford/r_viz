@@ -165,7 +165,32 @@ If you get stuck, look at the [ggplot2](https://ggplot2.tidyverse.org/reference/
 
 **Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
 
-**Answer:** There are many ways to do this, but a time series plot can help show how things change over time
+**Answer:** There are many ways to do this, but a scatter plot which is static in time and shows the variability across space can help us avoid showing too much. Essentially we run out of things to reasonably change to show all dimensions of the data.
+
+1. Reduce number of variables shown
+2. Remove faceting, relying on colour to show difference
+3. Clarity around units of variables
+4. Human friendly axis labels
+
+``` {r, fig.height = 5, fig.width = 7, eval=TRUE}
+p <- ggplot(data = filter(gapminder, year == 2007),
+       aes(x = gdpPercap/1000, y = lifeExp)) +
+  geom_point(aes(group  = country,#
+                 size   = pop*1e-6,
+                 color  = continent),
+             alpha = 0.75) +
+  scale_color_brewer(palette = "Dark2", name = "Continent") +
+  scale_x_log10() +
+  scale_size_area(name = "Population (millions)") +
+  theme_bw() + theme(legend.position = "bottom", legend.box = "vertical") +
+  xlab("GDP per capita, adjusted for inflation (1000 USD)") + 
+  ylab("Life expectancy at birth (years)") +
+    theme(panel.grid.minor.x = element_blank()) +
+    annotation_logticks(sides = "bt")
+
+p
+
+```
 
 # Activity 3 -- Making a worse graph
 
@@ -174,6 +199,40 @@ Make a new graph as in the previous activity but make it as bad as possible whil
 Consider the principles of graphical excellence and how can we go against them to make a truly terrible plot. Think about what was bad about the plot provided earlier. Consider abusing the ability to map graphical options (e.g. color, fill, line type, point size) to our variables of interest.
 
 **Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
+
+**Answer:** While the graph is already quite bad, we can make it worse by removing the focus on the relationship between GDP and LE, shifting one of them out of the $x$ and $y$ variables.
+
+``` {r, fig.height = 5, fig.width = 7, eval=TRUE}
+p_bad <- ggplot(data = gapminder,
+                aes(x = year - min(year), y = gdpPercap*pop)) +
+  geom_point(aes(fill = lifeExp, shape = continent,
+                 group = continent), 
+             position = position_dodge(width = 2.5)) +
+  #facet_wrap(~country, scales = "free_y") +
+  scale_y_log10() +
+  scale_shape_manual(values = 21:25) +
+  theme_dark() +
+  theme(legend.position = "left") +
+  scale_fill_gradientn(colours = rainbow(7), name = "Years") +
+  ylab("GDP") +
+  xlab("Time") +
+  geom_smooth(aes(color = continent), se=FALSE)
+
+p_bad
+```
+
+Here we've made the following changes:
+
+1. Put time since first observation on $x$ axis without units
+2. Put GDP on the $y$ axis, an interesting choice given we want to look chiefly at how life expectancy changes over time
+3. Put coloured points and coloured lines on the graph, but the colours aren't related
+4. Continent is mapped to both shape and line colour
+5. Put life expectancy's legend label as "Years"
+6. Whitespace is added on the left of the plot around the legend, a waste of space
+7. No context for what GDP is (it's total national GDP, equal to per capita GDP multiplied by total population), and USD `1e13` is hard to contextualise (it should be increasing in steps of $10^3$, e.g. a million, billion, trillion for the major breaks)
+8. The position changes in continent help make it a little clearer that there are multiple continents within a year, but it ends up looking like measurements were taken a year earlier or later than they were.
+9. The dark colour scheme is too similar in intensity to some of the blue and purple points, obscuring them from our vision
+10. Chosen a rainbow colour scheme, which is notorious for having poor properties that visually focus on yellows, are not colourblind friendly and do not convert to greyscale easily on account of multiple regions having the same intensity.
 
 # Activity 4 -- Group discussion
 
