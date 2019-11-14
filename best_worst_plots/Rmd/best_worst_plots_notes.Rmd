@@ -2,7 +2,7 @@
 title: "Notes on Tufte's principles and visualisation"
 subtitle: 'Statistical computing - 2031'
 author: 'Sam Clifford'
-date: '2019-11-08'
+date: '2019-11-15'
 citation_package: natbib
 bibliography: extras.bib
 csl: chicago-author-date.csl
