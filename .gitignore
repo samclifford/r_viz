@@ -74,3 +74,23 @@ best_worst_plots/best_worst_plot_slides.log
 best_worst_plots/best_worst_plot_slides.pdf
 
 best_worst_plots/.DS_Store
+
+.DS_Store
+
+best_worst_plots/Rmd/.Rhistory
+
+*.log
+
+*.aux
+
+best_worst_plots/Rmd/best_worst_plots_slides.bbl
+
+best_worst_plots/Rmd/best_worst_plots_slides.blg
+
+best_worst_plots/Rmd/best_worst_plots_slides.nav
+
+*.snm
+
+*.vrb
+
+*.toc

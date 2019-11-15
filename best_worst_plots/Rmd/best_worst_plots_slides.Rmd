@@ -2,7 +2,7 @@
 title: 'Visualisation with ggplot2'
 subtitle: '2031 - Statistical Computing'
 author: 'Sam Clifford'
-date: '2019-11-08'
+date: '2019-11-15'
 output:
   beamer_presentation:
     keep_tex: true
@@ -13,7 +13,6 @@ output:
     includes: 
       in_header: matrix.tex
 header-includes:
- - \usepackage{hyperref}
  - \usepackage{longtable}
 bibliography: extras.bib
 #csl: chicago-author-date.csl
@@ -73,6 +72,81 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
 * Avoid excessive and unnecessary use of graphical effects (chartjunk)
 * Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
 
+# Examples of visualisation
+
+### Bar plot
+
+\begin{figure}
+\includegraphics[width = 0.8\linewidth]{bars_3d.jpg}
+\caption{Total aid to localities as a fraction of total budget, p83 \citet{tufte}}
+\end{figure}
+
+### Bar plot
+
+\begin{figure}
+\includegraphics[width = \linewidth]{bars_omissions.jpg}
+\caption{Elements of bar plot from p83 \citet{tufte}}
+\end{figure}
+
+### Line plot
+
+\begin{figure}
+\includegraphics[width = 0.8\linewidth]{copper.jpg}
+\caption{Thermal conductivity of copper across laboratories, p49 \citet{tufte} citing \citet{osti}}
+\end{figure}
+
+### Line plot
+
+* Thermal conductivity as a function of temperature
+* One line per lab
+* Curve varies across labs due to impurities in copper
+* Enables comparisons across labs *and* overall behaviour
+* Might be better as an interactive plot
+
+
+### Ribbon plot
+
+
+:::::::::::::: {.columns}
+::: {.column}
+
+* Age split of college enrolments 1972-1976
+* Line plot filled to top and bottom
+* Sum to 100% not obvious - under 25s vs 25 and over
+* Four colours when no colouring necessary
+* Curves are embellishments that distract
+* Shadow distracts
+* Broken axis
+* Could just be a bar plot or even a table
+
+:::
+::: {.column}
+
+\begin{figure}
+\includegraphics[width = 0.8\linewidth]{college.jpg}
+\caption{p43 \citet{tufte}}
+\end{figure}
+
+:::
+::::::::::::::
+
+### Artist collaboration
+
+\begin{figure}
+\includegraphics[width = \linewidth]{beetle.jpg}
+\caption{Life cycle of Japanese beetle p43 \citet{tufte}}
+\end{figure}
+
+### Artist collaboration
+
+* Lots of information
+* Depth of grub
+* Life stage of grubs/larvae
+* Foliage as food source
+* Wraps at end of year
+* Seasonal annotations 
+* Requires highly skilled artist
+* Highly impactful
     
 # Building plots
 
@@ -109,25 +183,25 @@ ggplot(data = my.data.frame,
 
 <!-- * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements) -->
 
-\footnotesize
+\scriptsize
 
 ``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
 data(airquality)
-ggplot(data = airquality,
+solar_temp_plot <- ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
   geom_point() 
+
+solar_temp_plot
 ```
 
 ### Scatter plot
 
 * We can add some human-friendly labels and change the theme
 
-\footnotesize
+\scriptsize
 
 ``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
-ggplot(data = airquality,
-       aes(x = Solar.R, y = Temp)) +
-  geom_point() +
+solar_temp_plot +
   labs(x = 'Solar radiation (Langleys)',
        y = 'Max. daily temp. (F)') +
   theme_bw()
@@ -286,10 +360,10 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 
 \tiny 
 
-``` {r, echo=T, message=F, fig.width=4, fig.height=2}
-ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
-  geom_point() + geom_smooth() + theme_bw() +
-  labs(x=expression(Temperature~(degree*F)), y='Ozone (ppb)')
+``` {r, echo=T, message=F, fig.width=6, fig.height=3}
+solar_temp_plot +
+  theme_bw() + geom_smooth()
+  labs(x=expression(Temperature~(degree*F)), y='Solar radiation (Langleys)')
 ```
 
 
