@@ -46,7 +46,7 @@ library(tidyverse)
 Visual representations of data must tell the truth
 
 
-``` {r fig.margin=T, echo=F, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max'}
+``` {r fig.margin=T, echo=T, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max'}
 data(mtcars)
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   geom_point(alpha=0.5) +
@@ -71,13 +71,12 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 3. Show variation through data, not through design.
 4. Ensure appropriate standardization & comparisons are used, e.g.  CPI-adjusted or seasonally-adjusted.
 
-``` {r fig.margin=T, echo=F, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.\\label{fig:2mpg}", fig.height=4, fig.width=6}
+``` {r fig.margin=T, echo=T, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.\\label{fig:2mpg}", fig.height=4, fig.width=6}
 data(mtcars)
 ggplot(data=mtcars, aes(x=wt, y=mpg)) +
   geom_point(aes(shape=factor(cyl),
              color=mpg),
               stroke=0, alpha=0.75, size=2) + 
-  #facet_wrap( ~ cyl, ncol=1) +
   theme_bw() +
   theme(legend.position = 'right') +
   scale_shape_discrete(name='Number\nof\ncylinders') +
@@ -108,7 +107,7 @@ Good graphical representations maximize data-ink and erase as much non-data-ink 
 
 For example, the boxplot is a simple five number summary of a continuous variable that draws multiple rectangles, lines and points to show the quantiles of the data and any outliers [@Frigge1989]. Tufte considers that the outliers are not important in showing the typical spread of the data and that the box is unnecessary as the quantiles are shown with the 'whiskers' of the plot and the median line. A standard boxplot from ggplot2 is shown in Figure \ref{fig:ggbox} and a version that removes extraneous lines and points in Figure \ref{fig:tuftebox}.
 
-``` {r fig.margin=T, fig.cap='Standard boxplot\\label{fig:ggbox}', echo=F}
+``` {r fig.margin=T, fig.cap='Standard boxplot\\label{fig:ggbox}', echo=T}
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
@@ -119,8 +118,8 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 
 A lot of the elements of the boxplot can be removed without reducing our ability to distinguish the relevant information.
 
-``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=F, fig.height=1.5, fig.width=4}
-
+``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=T, fig.height=1.5, fig.width=4}
+library(ggthemes) # for the tufte boxplot geometry
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
@@ -145,19 +144,18 @@ If an element of a graph is to be included, it should be because it aids underst
 
 We must ensure that when we are plotting we don't end up with large amounts of white space when avoidable. Small multiples can be attractive, but leaving empty facets leads to unnecessary amounts of white space that reduce the amount of space in the figure dedicated to showing the data in existing combinations of faceting variables.   
    
-``` {r, echo=F, fig.cap='High dimensional data set with points coloured by number of forward gears and shape mapped to transmission type', fig.margin=T, fig.width=4, fig.height=2.5}
-mtcars %>%
-  mutate(am = c('Automatic', 'Manual')[am + 1],
-         vs = c('V', 'S')[vs + 1]) %>%
-  ggplot(data=., aes(x=factor(cyl),
-                    y=mpg)) +
-  geom_point(aes(color=factor(gear),
-                 group = factor(gear),
-                 shape=am),
-             position = position_dodge(w = 0.25),
-             alpha = 0.5) +
-  scale_color_discrete(name='Gears') +
-  scale_shape(name='Transmission') +
+``` {r, echo=T, fig.cap='High dimensional data set with points coloured by number of forward gears and shape mapped to transmission type', fig.margin=T, fig.width=4, fig.height=2.5}
+mtcars_am <- mutate(mtcars, 
+                    Transmission = 
+                      factor(am, 
+                             levels = c(0,1),
+                             labels = c("Automatic", "Manual")),
+                    Gears = factor(gear))
+
+ggplot(data=mtcars_am, aes(x = factor(cyl), y = mpg)) +
+  geom_point(aes(color = Gears, group = Gears, shape = Transmission),
+             position  = position_dodge(w = 0.25),
+             alpha     = 0.5) +
   theme_bw() +
   theme(legend.position='right') +
   xlab('Cylinders') +
@@ -166,14 +164,11 @@ mtcars %>%
 ```
 
 
-``` {r, echo=F, fig.cap='High dimensional data set with small multiples faceting by number of forward gears and transmission type', fig.margin=T, fig.height=2.5, fig.width=4}
-mtcars %>%
-  mutate(am = c('Automatic', 'Manual')[am + 1],
-         vs = c('V', 'S')[vs + 1]) %>%
-  ggplot(data=., aes(x=factor(cyl),
-                    y=mpg)) +
-  geom_point(position = position_jitter(h=0, w=0.1)) +
-  facet_grid(am ~ gear) +
+``` {r, echo=T, fig.cap='High dimensional data set with small multiples faceting by number of forward gears and transmission type. Two of the six facets are empty, indicating that the graph should be redesigned.', fig.margin=T, fig.height=2.5, fig.width=4}
+ggplot(data = mtcars_am,
+       aes(x = factor(cyl), y = mpg)) +
+  geom_point(position = position_jitter(h = 0, w = 0.1)) +
+  facet_grid(Transmission ~ Gears, labeller = labeller(.cols = label_both)) +
   theme_bw() +
   xlab('Number of cylinders') +
   ylab('Fuel efficiency (mpg)')
