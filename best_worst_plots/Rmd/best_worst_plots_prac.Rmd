@@ -3,20 +3,21 @@ title: 'Visualisation with ggplot2'
 subtitle: '2031 - Statistical Computing'
 author: 'Sam Clifford'
 date: '2019-11-15'
-output: 
-  pdf_document:
-    includes:
-      in_header: matrix.tex
-citation_package: natbib
-csl: chicago-author-date.csl
-bibliography: extras.bib
+output: pdf_document
+header-includes:
+  - \usepackage[sfdefault, condensed]{roboto}
+urlcolor: blue
 ---
 
 
 ```{r setup, include=FALSE}
 library(knitr)
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, eval=FALSE,
-                      fig.align='center', dpi = 300)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning=FALSE, 
+                      message=FALSE,
+                      eval=FALSE,
+                      fig.align='center', 
+                      dpi = 300)
 library(tidyverse)
 ```
 
@@ -43,27 +44,6 @@ This prac will investigate the visual display of data and what makes a good and 
 
 Organise yourselves into groups of 2-3 students to collaboratively solve the following exercises.
 
-<!-- Assign the following roles. Someone may need to take on multiple roles or you may need to split a role depending on the size of your group. -->
-
-``` {r, echo=FALSE, results='asis', fig.align='center', eval=FALSE, fig.width=7, fig.height=5, fig.align = 'center', out.width = '100%'}
-library(pander)
-panderOptions('table.alignment.default', 'center')
-data.frame(Role = c('Chair', 'Scribe', 'Research', 'Programmer', 'Critical Friend', 'Spokesperson'),
-           Duties = c('Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute',
-                      'Responsible for recording answers in this worksheet',
-                      'Has the slides ready and able to fetch other relevant information online',
-                      'Drives R with the support of the group',
-                      'Constructive criticism, is the group answering the question?',
-                      'Presentation of discussion points to class')) %>%
-  mutate(Name = rep('Student Name', nrow(.)),
-         Email = rep('Student Email', nrow(.))) %>%
-  pandoc.table(justify=rep('left', ncol(.)),
-               graph.boxes=TRUE, table.split.table= Inf,
-               style='multiline', keep.line.breaks = TRUE,
-               split.cells = c('20%', '30%', '20%', '30%'))
-
-```
-
 A reminder of expectations in the prac:
 
 * Keep a record of the work being completed with a well-commented R script
@@ -73,7 +53,7 @@ A reminder of expectations in the prac:
 
 # Activity 1 - Building an attempt at a plot
 
-We will be looking at the gapminder data set as found in the gapminder package [@gapminder]. This data has been collected from countries around the world and contains data on life expectancy, population and GDP per capita for 142 countries from 1952 to 2007.
+We will be looking at the gapminder data set as found in the gapminder package. This data has been collected from countries around the world and contains data on life expectancy, population and GDP per capita for 142 countries from 1952 to 2007.
 
 **Exercise:** Copy and paste the code below to produce a plot showing how the relationship between GDP, life expectancy and population vary over time and continent. If you can't install the gapminder package, you can download the data from Moodle and load it with `read_csv()` from the readr package (loaded when tidyverse is loaded).
 
@@ -101,49 +81,7 @@ ggplot(data = gapminder,
 
 **Exercise:** Discuss, within your group, what you think is good and bad about this plot. Does it conform to Tufte's principles of graphical excellence? Is it easy to interpret? Does it show the relationship we are interested in? List *three* important improvements that are needed for this graph to be useful.
 
-<!-- **Answer:** The plot shows each country's data connected by a line so it's clear that individual country's GDP and life expectancy changes over time in a sequence, although we don't know which direction along the line we are travelling forward in time. By separating each continent out, we can see the trends geographically, such as Europe being clustered quite closely and Africa being very scattered (lots of variation across space and time, rather than a nice orderly procession from bottom left to top right). Logarithmic axis helps put the lines at approximately 45 degree angles rather than as difficult to read logarithmic curves. The large points obscure the data. Continent is mapped to both colour and facet. It's hard to make comparisons across continents because the $x$ and $y$ scales are different, so we have to think very hard about whether Asia is richer or poorer than Europe, on average, and we may miss that there is very little overlap in the Oceania and Africa values. -->
-
-<!-- Three things which might be worth changing: -->
-
-<!-- 1. Same axis scaling -->
-<!-- 2. Show less data (either fewer variables or fewer continents/years) -->
-<!-- 3. Put time on the $x$ axis -->
-
 **Exercise:** As a group, discuss what you think each line of code in the above block does. You may wish to answer as comments in your code (everything after a `#` is a comment) or in a separate document.
-
-<!-- **Answer:** -->
-
-<!-- ``` {r, eval=FALSE, fig.width = 8, fig.height = 3} -->
-<!-- library(gapminder) # load package with data -->
-<!-- library(tidyverse) # load package to manipulate and visualise data -->
-<!-- data(gapminder)    # load the gapminder data -->
-
-<!-- # make a plot with the gapminder data -->
-<!-- ggplot(data = gapminder, -->
-<!--        # put GDP as X variable and LE as Y -->
-<!--        aes(x = gdpPercap, y = lifeExp)) + -->
-<!--   # draw the X-Y pairs as a line, ordered by appearance in data frame -->
-<!--   # group the lines by country and colour them by the continent -->
-<!--   geom_path(aes(group = country, color = continent)) + -->
-<!--   # draw points at each X-Y pair, coloured by continent and  -->
-<!--   # with their size based on the POP variable -->
-<!--   geom_point(aes(color = continent, size = pop)) + -->
-<!--   # change the colour scheme from the default for any colour aesthetics -->
-<!--   # make a logarithmic scale on the X axis -->
-<!--   scale_color_brewer(palette = 'Dark2') + scale_x_log10() + -->
-<!--   # put logarithmic ticks on the bottom X axis showing that we don't have -->
-<!--   # a uniform scaling -->
-<!--   annotation_logticks(sides = 'b') +  -->
-<!--   # put each continent on its own set of axes, with all plots in one row -->
-<!--   facet_wrap( ~ continent, scales = 'free', nrow = 1) + -->
-<!--   # the size of the points, based on the POP variable, should have an area -->
-<!--   # proportional to value of POP, rather than their radius -->
-<!--   scale_size_area() + -->
-<!--   # put the plot legend at the bottom and stack the variable keys vertically -->
-<!--   theme(legend.position = 'bottom', -->
-<!--         legend.box = 'vertical') -->
-
-<!-- ``` -->
 
 # Activity 2 -- Making a better graph
 
@@ -165,33 +103,6 @@ If you get stuck, look at the [ggplot2](https://ggplot2.tidyverse.org/reference/
 
 **Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
 
-<!-- **Answer:** There are many ways to do this, but a scatter plot which is static in time and shows the variability across space can help us avoid showing too much. Essentially we run out of things to reasonably change to show all dimensions of the data. -->
-
-<!-- 1. Reduce number of variables shown -->
-<!-- 2. Remove faceting, relying on colour to show difference -->
-<!-- 3. Clarity around units of variables -->
-<!-- 4. Human friendly axis labels -->
-
-<!-- ``` {r, fig.height = 5, fig.width = 7, eval=TRUE} -->
-<!-- p <- ggplot(data = filter(gapminder, year == 2007), -->
-<!--        aes(x = gdpPercap/1000, y = lifeExp)) + -->
-<!--   geom_point(aes(group  = country,# -->
-<!--                  size   = pop*1e-6, -->
-<!--                  color  = continent), -->
-<!--              alpha = 0.75) + -->
-<!--   scale_color_brewer(palette = "Dark2", name = "Continent") + -->
-<!--   scale_x_log10() + -->
-<!--   scale_size_area(name = "Population (millions)") + -->
-<!--   theme_bw() + theme(legend.position = "bottom", legend.box = "vertical") + -->
-<!--   xlab("GDP per capita, adjusted for inflation (1000 USD)") +  -->
-<!--   ylab("Life expectancy at birth (years)") + -->
-<!--     theme(panel.grid.minor.x = element_blank()) + -->
-<!--     annotation_logticks(sides = "bt") -->
-
-<!-- p -->
-
-<!-- ``` -->
-
 # Activity 3 -- Making a worse graph
 
 Make a new graph as in the previous activity but make it as bad as possible while still attempting to honestly show the information (i.e. don't add things to the plot which can't be derived from the variables in the plot). 
@@ -199,40 +110,6 @@ Make a new graph as in the previous activity but make it as bad as possible whil
 Consider the principles of graphical excellence and how can we go against them to make a truly terrible plot. Think about what was bad about the plot provided earlier. Consider abusing the ability to map graphical options (e.g. color, fill, line type, point size) to our variables of interest.
 
 **Exercise:** Make a plot, save it to your computer and write comments in your code or standalone document that outline what the changes you made were and why.
-
-<!-- **Answer:** While the graph is already quite bad, we can make it worse by removing the focus on the relationship between GDP and LE, shifting one of them out of the $x$ and $y$ variables. -->
-
-<!-- ``` {r, fig.height = 5, fig.width = 7, eval=TRUE} -->
-<!-- p_bad <- ggplot(data = gapminder, -->
-<!--                 aes(x = year - min(year), y = gdpPercap*pop)) + -->
-<!--   geom_point(aes(fill = lifeExp, shape = continent, -->
-<!--                  group = continent),  -->
-<!--              position = position_dodge(width = 2.5)) + -->
-<!--   #facet_wrap(~country, scales = "free_y") + -->
-<!--   scale_y_log10() + -->
-<!--   scale_shape_manual(values = 21:25) + -->
-<!--   theme_dark() + -->
-<!--   theme(legend.position = "left") + -->
-<!--   scale_fill_gradientn(colours = rainbow(7), name = "Years") + -->
-<!--   ylab("GDP") + -->
-<!--   xlab("Time") + -->
-<!--   geom_smooth(aes(color = continent), se=FALSE) -->
-
-<!-- p_bad -->
-<!-- ``` -->
-
-<!-- Here we've made the following changes: -->
-
-<!-- 1. Put time since first observation on $x$ axis without units -->
-<!-- 2. Put GDP on the $y$ axis, an interesting choice given we want to look chiefly at how life expectancy changes over time -->
-<!-- 3. Put coloured points and coloured lines on the graph, but the colours aren't related -->
-<!-- 4. Continent is mapped to both shape and line colour -->
-<!-- 5. Put life expectancy's legend label as "Years" -->
-<!-- 6. Whitespace is added on the left of the plot around the legend, a waste of space -->
-<!-- 7. No context for what GDP is (it's total national GDP, equal to per capita GDP multiplied by total population), and USD `1e13` is hard to contextualise (it should be increasing in steps of $10^3$, e.g. a million, billion, trillion for the major breaks) -->
-<!-- 8. The position changes in continent help make it a little clearer that there are multiple continents within a year, but it ends up looking like measurements were taken a year earlier or later than they were. -->
-<!-- 9. The dark colour scheme is too similar in intensity to some of the blue and purple points, obscuring them from our vision -->
-<!-- 10. Chosen a rainbow colour scheme, which is notorious for having poor properties that visually focus on yellows, are not colourblind friendly and do not convert to greyscale easily on account of multiple regions having the same intensity. -->
 
 # Activity 4 -- Group discussion
 
@@ -244,8 +121,5 @@ Make sure you save your R script, and anything else you have produced and ensure
 
 # Further reading
 
-A lot of the key ideas in data visualisation arose with @tufte, and are summarised by @pantoliano. Some of the history of data visualisation is summarised well by @Friendly:05:gfkl and @Friendly:06:hbook. [Tufte's website](https://www.edwardtufte.com/tufte/) is well worth exploring, particularly the discussion on how the visual presentation of information could have helped avert the *Challenger* disaster [@visstatthink1997]. For some more guidance on using ggplot2 for data visualisation, check Chapter 3 of @r4ds, the RStudio cheatsheets [@cheatsheets], and @changgraphics.
+A lot of the key ideas in data visualisation arose with [Tufte (1983)](https://www.edwardtufte.com/tufte/books_vdqi), and are [summarised by Mike Pantoliano](https://moz.com/blog/data-visualization-principles-lessons-from-tufte). Some of the history of data visualisation is summarised well by Michael Friendly ([2005](https://onlinelibrary.wiley.com/doi/abs/10.1002/jhbs.20078), [2006](https://link.springer.com/chapter/10.1007/978-3-540-33037-0_2)). [Tufte's website](https://www.edwardtufte.com/tufte/) is well worth exploring, particularly the discussion on how the visual presentation of information could have helped avert the *Challenger* disaster ([Tufte, 1997](https://www.edwardtufte.com/tufte/books_textb)). For some more guidance on using ggplot2 for data visualisation, check Chapter 3 of [R for Data Science](https://r4ds.had.co.nz/), the [RStudio cheatsheets](https://rstudio.com/resources/cheatsheets/), and Winston Chang's [R Graphics Cookbook](https://r-graphics.org/).
 
-# References
-
-\footnotesize
