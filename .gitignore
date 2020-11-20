@@ -94,3 +94,23 @@ best_worst_plots/Rmd/best_worst_plots_slides.nav
 *.vrb
 
 *.toc
+
+files/
+
+*.zip
+
+smoking/Rmd/ANTONIO PRAC ANSWERS.pdf
+
+smoking/Rmd/ANTONIO PRAC.pdf
+
+smoking/Rmd/ANTONIO SLIDES.pdf
+
+*.blg
+
+*.bbl
+
+*.nav
+
+smoking/Rmd/smoking_slides.tex
+
+smoking/Rmd/smoking_slides.pdf
