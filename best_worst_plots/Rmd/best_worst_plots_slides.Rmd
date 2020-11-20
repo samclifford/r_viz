@@ -31,6 +31,12 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
                       fig.align='center', out.width = '100%',
                       fig.width=4,  fig.height=2)
 
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
 ```
 
 # Principles of graphical excellence
@@ -185,7 +191,7 @@ ggplot(data = my.data.frame,
 
 \scriptsize
 
-``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
+``` {r, eval=T, echo=T, fig.width=4, fig.height=2, size = "small"}
 data(airquality)
 solar_temp_plot <- ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
@@ -326,9 +332,8 @@ solar_temp_plot +
 
 ``` {r, fig.height=3, fig.width=8, echo=T}
 # make the date column
-library(data.table)
-airquality <- data.table(airquality)
-airquality[, Date := as.Date(paste('1973', Month, Day, sep = '-'))]
+airquality <- mutate(airquality,
+                     Date = as.Date(paste('1973', Month, Day, sep = '-')))
 
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + theme_bw() +
@@ -338,15 +343,14 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 
 ### Line plot
 
-* `geom_line()` stops plotting when it hits an `NA` value
-* If we have individual measurements in a group of `NA` values it won't plot that value 
-* Can use multiple geometries to display the same variables - each geometry is a layer in the plot 
+* If we have an observation whose neighbours are both `NA` values it won't be plotted!
+* Can layer multiple geometries for same aesthetic mapping
 
-\tiny
-
-``` {r, fig.height=3, fig.width=8, echo=T}
+``` {r, fig.height=3, fig.width=8, echo=T, size = "tiny"}
 ggplot(data=airquality, aes(x=Date, y=Ozone)) +
-  geom_line() + geom_point() + theme_bw() +
+  geom_line() +
+  geom_point() + 
+  theme_bw() +
   labs(y='Ozone concentration (ppb)',
        title = 'Daily mean Ozone in NYC (1973)')
 ```
@@ -460,17 +464,22 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 
 ``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%'}
 library(mosaicData)
-library(data.table)
+#library(data.table)
 
 data(Weather)
 
-Weather <- data.table(Weather)
+#Weather <- data.table(Weather)
   
+# Weather_summarised <-
+#   Weather[ , 
+#            lapply(.SD, mean),
+#            by = .(city, month, year),
+#            .SDcols = patterns('temp')]
+
 Weather_summarised <-
-  Weather[ , 
-           lapply(.SD, mean),
-           by = .(city, month, year),
-           .SDcols = patterns('temp')]
+  group_by(Weather, city, month, year) %>%
+  summarise_at(.vars = vars(contains("temp")),
+               .funs = mean)
 
 Weather_plot <-
   ggplot(data = Weather_summarised, aes(x = month, y = avg_temp)) +
