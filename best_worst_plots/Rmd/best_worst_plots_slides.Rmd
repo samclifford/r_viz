@@ -1,8 +1,8 @@
 ---
 title: 'Visualisation with ggplot2'
-subtitle: '2031 - Statistical Computing'
+subtitle: '2031 - Introduction to Statistical Computing'
 author: 'Sam Clifford'
-date: '2019-11-15'
+date: '2020-11-26'
 output:
   beamer_presentation:
     keep_tex: true
@@ -78,81 +78,6 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 * Avoid excessive and unnecessary use of graphical effects (chartjunk)
 * Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
 
-# Examples of visualisation
-
-### Bar plot
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{bars_3d.jpg}
-\caption{Total aid to localities as a fraction of total budget, p83 \citet{tufte}}
-\end{figure}
-
-### Bar plot
-
-\begin{figure}
-\includegraphics[width = \linewidth]{bars_omissions.jpg}
-\caption{Elements of bar plot from p83 \citet{tufte}}
-\end{figure}
-
-### Line plot
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{copper.jpg}
-\caption{Thermal conductivity of copper across laboratories, p49 \citet{tufte} citing \citet{osti}}
-\end{figure}
-
-### Line plot
-
-* Thermal conductivity as a function of temperature
-* One line per lab
-* Curve varies across labs due to impurities in copper
-* Enables comparisons across labs *and* overall behaviour
-* Might be better as an interactive plot
-
-
-### Ribbon plot
-
-
-:::::::::::::: {.columns}
-::: {.column}
-
-* Age split of college enrolments 1972-1976
-* Line plot filled to top and bottom
-* Sum to 100% not obvious - under 25s vs 25 and over
-* Four colours when no colouring necessary
-* Curves are embellishments that distract
-* Shadow distracts
-* Broken axis
-* Could just be a bar plot or even a table
-
-:::
-::: {.column}
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{college.jpg}
-\caption{p43 \citet{tufte}}
-\end{figure}
-
-:::
-::::::::::::::
-
-### Artist collaboration
-
-\begin{figure}
-\includegraphics[width = \linewidth]{beetle.jpg}
-\caption{Life cycle of Japanese beetle p43 \citet{tufte}}
-\end{figure}
-
-### Artist collaboration
-
-* Lots of information
-* Depth of grub
-* Life stage of grubs/larvae
-* Foliage as food source
-* Wraps at end of year
-* Seasonal annotations 
-* Requires highly skilled artist
-* Highly impactful
     
 # Building plots
 
@@ -189,9 +114,8 @@ ggplot(data = my.data.frame,
 
 <!-- * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements) -->
 
-\scriptsize
 
-``` {r, eval=T, echo=T, fig.width=4, fig.height=2, size = "small"}
+``` {r, eval=T, echo=T, fig.width=6, fig.height=2, size = "scriptsize"}
 data(airquality)
 solar_temp_plot <- ggplot(data = airquality,
        aes(x = Solar.R, y = Temp)) +
@@ -206,11 +130,13 @@ solar_temp_plot
 
 \scriptsize
 
-``` {r, eval=T, echo=T, fig.width=4, fig.height=2}
-solar_temp_plot +
+``` {r, eval=T, echo=T, fig.width=6, fig.height=2, size = "small"}
+solar_temp_plot <- solar_temp_plot +
   labs(x = 'Solar radiation (Langleys)',
        y = 'Max. daily temp. (F)') +
   theme_bw()
+
+solar_temp_plot
 ```
 
 
@@ -335,24 +261,20 @@ solar_temp_plot +
 airquality <- mutate(airquality,
                      Date = as.Date(paste('1973', Month, Day, sep = '-')))
 
-ggplot(data=airquality, aes(x=Date, y=Ozone)) +
+airquality_plot <- ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + theme_bw() +
   labs(y='Ozone concentration (ppb)',
        title = 'Daily mean Ozone in NYC (1973)')
+
 ```
 
 ### Line plot
 
-* If we have an observation whose neighbours are both `NA` values it won't be plotted!
+* If we have an observation whose neighbours are both `NA` values it can't be plotted with a line
 * Can layer multiple geometries for same aesthetic mapping
 
 ``` {r, fig.height=3, fig.width=8, echo=T, size = "tiny"}
-ggplot(data=airquality, aes(x=Date, y=Ozone)) +
-  geom_line() +
-  geom_point() + 
-  theme_bw() +
-  labs(y='Ozone concentration (ppb)',
-       title = 'Daily mean Ozone in NYC (1973)')
+airquality_plot + geom_point()
 ```
 
 
@@ -362,12 +284,9 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 * Maybe we want to show the reader the trend in the data
 * `geom_smooth()` generates a **scatterplot smoother** that shows the overall relationship between $y$ and $x$
 
-\tiny 
 
-``` {r, echo=T, message=F, fig.width=6, fig.height=3}
-solar_temp_plot +
-  theme_bw() + geom_smooth()
-  labs(x=expression(Temperature~(degree*F)), y='Solar radiation (Langleys)')
+``` {r, echo=T, message=F, fig.width=6, fig.height=3, size = "small"}
+airquality_plot + geom_point() + geom_smooth() 
 ```
 
 
@@ -388,11 +307,11 @@ ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
 
 ### Histograms
 
+* univariate graphical summary needs only one aesthetic, `x`
 * e.g. a histogram of Ozone concentrations
 
-\tiny 
 
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2}
+``` {r, eval=T, echo=T, message=F, fig.width=6, fig.height=2, size = "scriptsize"}
 ozone_hist <-
   ggplot(data = airquality, aes(x = Ozone)) +  
   geom_histogram(binwidth = 10, boundary = 0) +  
@@ -406,7 +325,7 @@ ozone_hist
 
 ### Aesthetics
 
-* The $x$ and $y$ positions are the simplest aesthetic options we've seen
+* We've seen the $x$ and $y$ positions so far
 * We can also map the following options to variables 
     - **size** of point or thickness of boundary
     - **shape** of points
@@ -415,7 +334,8 @@ ozone_hist
     - **fill** colour of internals of geometry
     - **group** to repeat geometry for each subset of the data corresponding to the grouping variable
     
-* We can also put these (except group) *outside* `aes()` to set the value for all parts of that geometry
+* We can also put these (except group) *outside* `aes()` to fix the value for all parts of that geometry
+* Any aesthetics specified inside `ggplot()` will be inherited by all geometries for that plot
 
 ### Aesthetics
 
@@ -423,9 +343,9 @@ ozone_hist
 
 ``` {r, eval=T, echo=T, fig.height=2, fig.width=4, message=F}
 ggplot(data = airquality, aes(x = Ozone)) +  
-  geom_histogram(binwidth = 10, boundary = 0,
-                 color = 'black',
-                 aes(fill = factor(Month))) +  
+  geom_histogram(aes(fill = factor(Month)),
+                 binwidth = 10, boundary = 0,
+                 color = 'black') +  
   labs(x = 'Ozone concentration (ppb)') +
   theme_bw() + 
   scale_fill_viridis_d(name = 'Month')
@@ -457,44 +377,46 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 * If we have two (or more) grouping variables we can use `facet_grid()` to tell R to repeat the aesthetic and geometries for specified `rows` and `columns` variables
 
 
-
-\tiny
-
-
-
-``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%'}
+``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%', size = "tiny"}
 library(mosaicData)
-#library(data.table)
-
 data(Weather)
-
-#Weather <- data.table(Weather)
-  
-# Weather_summarised <-
-#   Weather[ , 
-#            lapply(.SD, mean),
-#            by = .(city, month, year),
-#            .SDcols = patterns('temp')]
 
 Weather_summarised <-
   group_by(Weather, city, month, year) %>%
   summarise_at(.vars = vars(contains("temp")),
                .funs = mean)
+```
+
+Or using the data.table approach
+
+``` {r, eval=FALSE, out.width = '100%', size = "tiny", echo = TRUE}
+library(data.table)
+Weather <- data.table(Weather)
+Weather_summarised <- Weather[ , lapply(.SD, mean),
+                               by = .(city, month, year),
+                               .SDcols = patterns('temp')]
+
+```
+
+### Small multiples
+
+``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%', size = "scriptsize"}
 
 Weather_plot <-
-  ggplot(data = Weather_summarised, aes(x = month, y = avg_temp)) +
+  ggplot(data = Weather_summarised, 
+         aes(x = month, y = avg_temp)) +
   geom_line() +
-  geom_ribbon(aes(ymin = low_temp, ymax = high_temp), alpha = 0.25) +
+  geom_ribbon(aes(ymin = low_temp, ymax = high_temp),
+              alpha = 0.25) +
   theme_bw() +
   xlab('Month') + ylab(expression(Temperature~(degree*F))) +
-  ggtitle('Monthly average of daily mean, min and max temperatures') +
+  ggtitle(
+    'Monthly avg. of daily mean, min and max temperatures') +
   facet_grid(rows = vars(year), cols = vars(city)) +
   scale_x_continuous(breaks = seq(1, 12, by = 3), 
                      minor_breaks = seq(1, 12), 
                      labels = function(x){month.abb[x]})
-
 ```
-
 
 ### Small multiples
 
@@ -557,4 +479,5 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
 * ggplot2 resources
     - @layered-grammar
     - @cheatsheets
+    - @changgraphics
 
