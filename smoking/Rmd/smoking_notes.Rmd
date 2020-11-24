@@ -10,8 +10,6 @@ output:
   pdf_document:
     includes:
       in_header: matrix.tex
-nocite: | 
-  @osti
 ---
 
 ```{r global_options, include=FALSE}
@@ -43,61 +41,9 @@ library(tidyverse)
 * Avoid chartjunk: the excessive and unnecessary use of graphical effects in graphs
 * Produce high data density graphs
 
-<!-- As a first step into considering what makes an effective visualisation, consider [this 2010 presentation by the late Hans Rosling](https://www.youtube.com/watch?v=jbkSRLYSojo) using data from the Gapminder project [@gapminder]. -->
+## Graphical integrity
 
-# Examples of visualisation for critique
-
-The following visualisations are found in Tufte (1983) and we discuss them here with a brief critique each.
-
-## Bar plot
-
-Below, we see an example of a bar plot with additional chart junk. Specifically, we have: a 3D effect; too many additional labels, such as the total budget for each year; and arrows for labelling the estimate for the current year and recommendation for the next year.
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{bars_3d.jpg}
-\caption{Total aid to localities as a fraction of total budget, p83 Tufte (1983)}
-\end{figure}
-
-By removing the elements in the below left, we retain the key information and are more easily able to make comparisons.
-
-\begin{figure}
-\includegraphics[width = \linewidth]{bars_omissions.jpg}
-\caption{Elements of bar plot from p83 Tufte (1983)}
-\end{figure}
-
-## Line plot
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{copper.jpg}
-\caption{Thermal conductivity of copper across laboratories, p49 Tufte (1983) citing Ho et al. (1974).}
-\end{figure}
-
-Here we see thermal conductivity as a function of temperature. Each experiment is a point, and data from the same lab are joined with a line. The curve varies across labs due to impurities in copper, and this grouping enables comparisons across labs *and* against the overall behaviour. While this may have been an effective plot when it was created, it is difficult to tell which lab a given data point and curve comes from; today this might be drawn as an interactive plot.
-
-
-## Ribbon plot
-
-The coloured ribbon plot shows the age split of college enrolments between 1972-1976, for under-25s and 25 and over. This is called a ribbon plot because the plot is a ribbon, a shaded area, between some minimum and maximum lines. 
-
-One issue with this ribbon plot is that the two ribbons sum to 100% but not in an obvious way, as the ribbons are separate rather than stacked and a doubly broken axis is used without showing the zero point or the top of the axis. Four colours are used, to show each age group and to give a visually distracting 3D effect. No colouring is necessary given that only one set of numbers can be used to represent these mutually exclusive and completely exhaustive age groups. That is, this could be a line plot or even a table.
-
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{college.jpg}
-\caption{p43 Tufte (1983)}
-\end{figure}
-
-## Artist collaboration
-
-\begin{figure}
-\includegraphics[width = \linewidth]{beetle.jpg}
-\caption{Life cycle of Japanese beetle p43 Tufte (1983)}
-\end{figure}
-
-The diagram of the life cycle of the Japanese beetle is rich with information and visually appealing - a highly impactful graph. The result of a collaboration with an artist, we see the depth of the grub, the life stage of grubs and larvae over time and which foliage is available as a food source. As this is an annual cycle, the graphs wraps around at each end and annotations provide additional detail which may not be easily captured graphically but in such a way that they do not hijack the viewer's attention.
-
-# Graphical integrity and ggplot2 code
-
-## Visual representations of data must tell the truth
+Visual representations of data must tell the truth
 
 
 ``` {r fig.margin=T, echo=T, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max'}
@@ -118,6 +64,9 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
     - Lie Factor = the size of the effect shown in the graphic divided by the size of the effect in the data.
     - Values over 1 overstate the effect & under 1 understate. 
     - Don't make points bigger to emphasise them as important
+
+
+
 2. Clear, detailed and thorough labelling helps avoid graphical distortion and ambiguity.  Write explanations of data on the graph.  Label important events from data.
 3. Show variation through data, not through design.
 4. Ensure appropriate standardization & comparisons are used, e.g.  CPI-adjusted or seasonally-adjusted.
@@ -233,9 +182,7 @@ ggplot(data = mtcars_am,
     - series of the same small graph repeated in one visual
     - can compare a main relationship across one or more grouping variables
     - a great way to visualise large quantities of data, or when there are a high number of dimensions
-    
-
-
+ 
 # Additional geometries
 
 ### Bar/column plots
@@ -360,14 +307,11 @@ Below we look at some examples of changing one or more of these.
 
 ### Group
 
-``` {r, echo=FALSE}
-bone <- read_tsv("bone.data.txt")
-```
-
-Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set such as the `r nrow(count(bone, idnum))` participants in the spinal bone density data set in Figure \ref{fig:spnbmd}.
+Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set such as the `r nrow(count(ElemStatLearn::bone, idnum))` participants in the spinal bone density data set in Figure \ref{fig:spnbmd}.
 
 ``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width='100%', fig.cap = "Rate of change of spinal bone mineral density\\label{fig:spnbmd}"}
-bone <- read_tsv("bone.data.txt")
+library(ElemStatLearn)
+data(bone)
 
 ggplot(data = bone, aes(x = age, y = spnbmd)) +
   geom_point(alpha=0.1) + facet_wrap(~ gender) +
