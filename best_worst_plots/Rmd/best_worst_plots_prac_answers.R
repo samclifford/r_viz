@@ -1,3 +1,7 @@
+library(tidyverse)
+library(countrycode)
+library(gapminder)
+
 # Activity 2a
 # **Answer:** There are many ways to do this, but a scatter plot which is static in time and shows the variability across space can help us avoid showing too much. Essentially we run out of things to reasonably change to show all dimensions of the data.
 
@@ -33,12 +37,20 @@ p
 # 4. Arrows to show direction of increasing time
 # 5. Title and subtitle on plot
 # 6. Changes to axis to add meaning but reduce clutter
-
-filter(gapminder, year %in% c(1997, 2007)) %>%
+p2 <- filter(gapminder, year %in% c(1997, 2007)) %>%
     mutate(
-        continent = countrycode(iso3n, "iso3n", destination = "un.region.name"),
+        iso3n     = countrycode(sourcevar = country,
+                                origin    = "country.name",
+                                destination = "iso3n", origin_regex = T),
+        continent = countrycode(iso3n, "iso3n",
+                                destination = "un.region.name"),
+        region    = countrycode(iso3n, "iso3n",
+                                destination = "un.regionsub.name"),
+        # Taiwan doesn't get converted by countrycode here, so we need to make it manually
         region    = ifelse(iso3n == 158, "Eastern Asia", region),
         continent = ifelse(iso3n == 158, "Asia", continent),
+        # Northern America and Australia & New Zealand have two countries each
+        # collapse them to one grouping variable level
         region    = fct_collapse(region,
                                  `CANZUS` = c("Northern America",
                                               "Australia and New Zealand"))) %>%
@@ -61,6 +73,8 @@ filter(gapminder, year %in% c(1997, 2007)) %>%
     scale_colour_brewer(palette = "Dark2", name = "Continent") +
     ggtitle(label    = "National GDP and life expectancy at birth",
             subtitle = "Change from 1997-2007")
+
+p2
 
 # Activity 2b
 
@@ -99,8 +113,8 @@ p_bad
 
 # or alternatively
 
-ggplot(data = gapminder,
-       aes(x = continent, y = gdpPercap)) +
+p_bad2 <- ggplot(data = gapminder,
+                 aes(x = continent, y = gdpPercap)) +
     geom_point(aes(color = lifeExp),
                alpha = 0.25,
                position = position_jitter(width = 0.15, height = 0)) +
@@ -108,15 +122,19 @@ ggplot(data = gapminder,
                           name = "Life Exp.",
                           limits = c(0, NA)) +
     theme_minimal() +
-    facet_wrap(~year) +
+    facet_wrap(~year,
+               scales = "free_y") +
     theme(axis.text.x = element_text(angle = 30, hjust = 1),
           legend.position = "left") +
     scale_y_continuous(labels = scales::dollar_format(accuracy = 0.01)) +
     xlab("Continent") +
     ylab("GDP")
 
+p_bad2
+
 # 1. GDP has no explanation and there's no need to have the cents listed in the dollar sign prices.
 # 2. There are probably too many facets to make comparisons from year to year easy and we can't track individual countries across time
 # 3. Linear scale starting at 0 obscures the smaller values, we can only see that there are some very large ones. This means there's a lot of extra white space in this plot.
 # 4. The colour scale for life expectancy is difficult to interpret, as the points are green to purple via blue. Rainbow colour schemes are very rarely the correct choice.
 # 5. The colour scale for life expectancy starts at 0, which is unnecessary as we are comparing colour rather than height above an axis. No countries have such low life expectancy - the lowest observed is 23.6.
+# 6. Allowing the scales to change for each facet's y axis makes it hard to compare across facets
