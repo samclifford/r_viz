@@ -1,8 +1,8 @@
 ---
-title: 'Visualisation with ggplot2'
-subtitle: '2031 - Introduction to Statistical Computing'
+title: 'Exploratory data analysis with ggplot2'
+subtitle: '2491 - Data challenge'
 author: 'Sam Clifford'
-date: '2020-11-26'
+date: '2021-01-14'
 output:
   beamer_presentation:
     keep_tex: true
@@ -12,8 +12,6 @@ output:
     citation_package: natbib
     includes: 
       in_header: matrix.tex
-header-includes:
- - \usepackage{longtable}
 bibliography: extras.bib
 #csl: chicago-author-date.csl
 ---
@@ -39,14 +37,27 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 
 ```
 
-# Principles of graphical excellence
+# What is exploratory data analysis?
 
+### What is exploratory data analysis?
+
+> Since the aim of exploratory data analysis is to learn what seems to be, it should be no surprise that pictures play a vital role in doing it well. There is nothing better than a picture for making you think of questions you had forgotten to ask (even mentally).
+
+@tukeytukey85
+
+### What is exploratory data analysis?
+
+* Combination of graphical and numerical summaries of data [@tukey1972some; @tukey1977exploratory]
+* Want to explore relationships in data with view to
+    - checking our assumptions about the data 
+    - model formulation
+    - designing further experiments 
+    
 ### Why do we visualise?
 
 * We don't just make graphs because it's fun (but it totally is!)
 * We do it to communicate information
 * Describing with summary statistics may not tell the whole story
-* Graph must communicate what's in your mind to reader, including key relationships
 * Reader should be able to understand what the graph means and not be
     - misled into thinking something that is untrue
     - distracted from the main point
@@ -54,29 +65,29 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 
 ### Tufte's principles
 
-\citet{tufte} and \citet{pantoliano}
+@tufte and @pantoliano
 
 * Show the data
-    - View should think about substance of the findings rather than methodology, graphical design, or other aspects
-    - Avoid distorting what the data have to say
-    - Serve a clear purpose:  description, exploration, tabulation, or decoration
+    - substance of results over method details or maker's skills
+    - avoid distorting data's meaning
+    - serve clear purpose:  description, exploration, tabulation, or decoration
 
 * Provide clarity
-    - Present many numbers in a small space (as opposed to a table)
-    - Make large data sets coherent
-    - Be closely integrated with the statistical and verbal descriptions of the data set
+    - many numbers, easily digestible
+    - coherent representation of large data set
+    - closely integrated with statistical and written descriptions of the data set
   
 ### Tufte's principles
 
 * Allow comparison where appropriate
-    - Encourage the eye to compare different pieces of data
-    - Reveal the data at several levels of detail, from a broad overview to the fine structure
+    - use aesthetics to draw attention to important details
+    - make clear that data has multiple levels of structure
 
-* Produce graphs with high data density by
-    * maximising data-ink and erasing non-data-ink 
+* Produce graphs with high data density
+    * make every drop of ink count
     * careful use of whitespace
 * Avoid excessive and unnecessary use of graphical effects (chartjunk)
-* Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
+* Don't use the same variable for multiple graphical elements (e.g. color and $y$ value)
 
     
 # Building plots
@@ -89,6 +100,7 @@ knitr::knit_hooks$set(chunk = function(x, options) {
     - adjustments to axis scales
     - adjustments to colors, themes, etc.
     - adding extra commands in a 'do this, then do this' manner
+* python users have plotnine [@plotnine] which is based on the same ideas
   
 ### Building plots
 
@@ -382,20 +394,18 @@ library(mosaicData)
 data(Weather)
 
 Weather_summarised <-
+  aggregate(data = Weather, FUN = mean, 
+            cbind(high_temp, avg_temp, low_temp) ~ city + month + year)
+
+```
+
+Or using the tidyverse approach
+
+``` {r, eval=FALSE, out.width = '100%', size = "tiny", echo = TRUE}
+Weather_summarised <-
   group_by(Weather, city, month, year) %>%
   summarise_at(.vars = vars(contains("temp")),
                .funs = mean)
-```
-
-Or using the data.table approach
-
-``` {r, eval=FALSE, out.width = '100%', size = "tiny", echo = TRUE}
-library(data.table)
-Weather <- data.table(Weather)
-Weather_summarised <- Weather[ , lapply(.SD, mean),
-                               by = .(city, month, year),
-                               .SDcols = patterns('temp')]
-
 ```
 
 ### Small multiples
@@ -435,7 +445,7 @@ Weather_plot
 ### Summary
 
 * We make graphs to tell a story with data
-* Graphs should draw the reader in and explain what they're seeing
+* Should draw reader in and explain what they're seeing
 * Plots are built from
     - geometric objects
     - axis scales
@@ -464,13 +474,14 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
   scale_size_discrete(name = 'Gears') +
   scale_color_brewer(name='Cylinders', palette = 'Pastel2') +
   xlab('Weight (1000lbs)') + ylab('Fuel efficiency (mpg)') +
-  geom_smooth(method = 'loess', se=FALSE, color = 'black')
+  geom_smooth(method = 'loess', se=FALSE, color = 'black') +
+  geom_smooth(method = 'lm',    se=FALSE, aes(color = factor(cyl)))
 ```
 
 
 ### Further reading
 
-* Extra notes on Tufte's principles
+<!-- * Extra notes on Tufte's principles -->
 * History of visualisation
     - \citet{Friendly:05:gfkl}
     - \citet{Friendly:06:hbook}
@@ -481,3 +492,4 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
     - @cheatsheets
     - @changgraphics
 
+### References
