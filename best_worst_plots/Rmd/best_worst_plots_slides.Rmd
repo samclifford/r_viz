@@ -11,7 +11,7 @@ output:
     latex_engine: xelatex
     citation_package: natbib
     includes: 
-      in_header: matrix.tex
+      in_header: ["matrix.tex", "headers.tex"]
 bibliography: extras.bib
 #csl: chicago-author-date.csl
 ---
@@ -282,6 +282,15 @@ airquality_plot <- ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 
 ### Line plot
 
+``` {r, fig.height=3, fig.width=8, echo=T}
+airquality_plot
+
+```
+
+* We see here that there are gaps in the line due to missing data
+
+### Line plot
+
 * If we have an observation whose neighbours are both `NA` values it can't be plotted with a line
 * Can layer multiple geometries for same aesthetic mapping
 
@@ -388,6 +397,7 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 
 * If we have two (or more) grouping variables we can use `facet_grid()` to tell R to repeat the aesthetic and geometries for specified `rows` and `columns` variables
 
+* Let's consider monthly averages of daily max, mean and min temperatures
 
 ``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%', size = "tiny"}
 library(mosaicData)
@@ -492,4 +502,3 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
     - @cheatsheets
     - @changgraphics
 
-### References
