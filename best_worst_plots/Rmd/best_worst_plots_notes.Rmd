@@ -1,13 +1,14 @@
 ---
 title: "Notes on Tufte's principles and visualisation"
-subtitle: 'Statistical computing - 2031'
+subtitle: '2491 - Data Challenge'
 author: 'Sam Clifford'
-date: '2019-11-15'
+date: '2021-02-05'
 citation_package: natbib
 bibliography: extras.bib
 csl: chicago-author-date.csl
 output: 
-  pdf_document:
+  tufte::tufte_handout:
+    latex_engine: xelatex
     includes:
       in_header: matrix.tex
 nocite: | 
@@ -19,7 +20,10 @@ library(knitr)
 library(ggplot2)
 library(ggthemes)
 library(tidyverse)
-knitr::opts_chunk$set(echo = TRUE, collapse=T, warning=F, message=F, tidy=FALSE, fig.width = 4, fig.height=2)
+library(scales)
+
+
+knitr::opts_chunk$set(echo = TRUE, collapse=T, warning=F, message=F, tidy=FALSE, fig.width = 3, fig.height=2)
 ```
 
 # Introduction
@@ -49,30 +53,34 @@ library(tidyverse)
 
 The following visualisations are found in Tufte (1983) and we discuss them here with a brief critique each.
 
+
+\begin{marginfigure}
+\includegraphics[width = \linewidth]{bars_3d.jpg}
+\caption{Total aid to localities as a fraction of total budget, p83 Tufte (1983)}
+\label{fig:bars3d}
+\end{marginfigure}
+
 ## Bar plot
 
-Below, we see an example of a bar plot with additional chart junk. Specifically, we have: a 3D effect; too many additional labels, such as the total budget for each year; and arrows for labelling the estimate for the current year and recommendation for the next year.
+In Figure \ref{fig:bars3d}, we see an example of a bar plot with additional chart junk. Specifically, we have: a 3D effect; too many additional labels, such as the total budget for each year; and arrows for labelling the estimate for the current year and recommendation for the next year.
 
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{bars_3d.jpg}
-\caption{Total aid to localities as a fraction of total budget, p83 Tufte (1983)}
-\end{figure}
+By removing the elements in the left hand panel of Figure \ref{fig:barsno3d}, we retain the key information and are more easily able to make comparisons without being distracted by 3D effects.
 
-By removing the elements in the below left, we retain the key information and are more easily able to make comparisons.
-
-\begin{figure}
+\begin{marginfigure}
 \includegraphics[width = \linewidth]{bars_omissions.jpg}
-\caption{Elements of bar plot from p83 Tufte (1983)}
-\end{figure}
+\caption{Elements of bar plot}
+\label{fig:barsno3d}
+\end{marginfigure}
 
 ## Line plot
 
-\begin{figure}
-\includegraphics[width = 0.8\linewidth]{copper.jpg}
+\begin{marginfigure}
+\includegraphics[width = \linewidth]{copper.jpg}
 \caption{Thermal conductivity of copper across laboratories, p49 Tufte (1983) citing Ho et al. (1974).}
-\end{figure}
+\label{fig:copper}
+\end{marginfigure}
 
-Here we see thermal conductivity as a function of temperature. Each experiment is a point, and data from the same lab are joined with a line. The curve varies across labs due to impurities in copper, and this grouping enables comparisons across labs *and* against the overall behaviour. While this may have been an effective plot when it was created, it is difficult to tell which lab a given data point and curve comes from; today this might be drawn as an interactive plot.
+In Figure \ref{fig:copper} we see thermal conductivity as a function of temperature. Each experiment is a point, and data from the same lab are joined with a line. The curve varies across labs due to impurities in copper, and this grouping enables comparisons across labs *and* against the overall behaviour. While this may have been an effective plot when it was created, it is difficult to tell which lab a given data point and curve comes from; today this might be drawn as an interactive plot.
 
 
 ## Ribbon plot
@@ -81,26 +89,27 @@ The coloured ribbon plot shows the age split of college enrolments between 1972-
 
 One issue with this ribbon plot is that the two ribbons sum to 100% but not in an obvious way, as the ribbons are separate rather than stacked and a doubly broken axis is used without showing the zero point or the top of the axis. Four colours are used, to show each age group and to give a visually distracting 3D effect. No colouring is necessary given that only one set of numbers can be used to represent these mutually exclusive and completely exhaustive age groups. That is, this could be a line plot or even a table.
 
-\begin{figure}
+\begin{marginfigure}
 \includegraphics[width = 0.8\linewidth]{college.jpg}
-\caption{p43 Tufte (1983)}
-\end{figure}
+\caption{Proportion of college enrolments under or over 25 years old. p43 Tufte (1983)}
+\end{marginfigure}
 
 ## Artist collaboration
 
-\begin{figure}
+\begin{figure*}[htbp]
 \includegraphics[width = \linewidth]{beetle.jpg}
 \caption{Life cycle of Japanese beetle p43 Tufte (1983)}
-\end{figure}
+\label{fig:beetle}
+\end{figure*}
 
-The diagram of the life cycle of the Japanese beetle is rich with information and visually appealing - a highly impactful graph. The result of a collaboration with an artist, we see the depth of the grub, the life stage of grubs and larvae over time and which foliage is available as a food source. As this is an annual cycle, the graphs wraps around at each end and annotations provide additional detail which may not be easily captured graphically but in such a way that they do not hijack the viewer's attention.
+The diagram of the life cycle of the Japanese beetle (Figure \ref{fig:beetle}) is rich with information and visually appealing - a highly impactful graph. The result of a collaboration with an artist, we see the depth of the grub, the life stage of grubs and larvae over time and which foliage is available as a food source. As this is an annual cycle, the graphs wraps around at each end and annotations provide additional detail which may not be easily captured graphically but in such a way that they do not hijack the viewer's attention.
 
 # Graphical integrity and ggplot2 code
 
 ## Visual representations of data must tell the truth
 
 
-``` {r fig.margin=T, echo=T, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max'}
+``` {r fig.margin=T, echo=T, fig.cap='Improper emphasis of most and least fuel efficient cars. We only need look at vertical range to see these are the min and max', fig.height=2, fig.width=3}
 data(mtcars)
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
   geom_point(alpha=0.5) +
@@ -122,7 +131,7 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 3. Show variation through data, not through design.
 4. Ensure appropriate standardization & comparisons are used, e.g.  CPI-adjusted or seasonally-adjusted.
 
-``` {r fig.margin=T, echo=T, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.\\label{fig:2mpg}", fig.height=4, fig.width=6}
+``` {r fig.margin=T, echo=T, fig.cap="Fuel efficiency mapped to colour and y coordinate. Gradated pattern of colour implies there's another relationship with fuel efficiency being looked at.\\label{fig:2mpg}", fig.height=2, fig.width=3}
 data(mtcars)
 ggplot(data=mtcars, aes(x=wt, y=mpg)) +
   geom_point(aes(shape=factor(cyl),
@@ -130,12 +139,15 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
               stroke=0, alpha=0.75, size=2) + 
   theme_bw() +
   theme(legend.position = 'right') +
-  scale_shape_discrete(name='Number\nof\ncylinders') +
+  scale_shape_discrete(name='Number of\ncylinders') +
   xlab('Weight (1000 lbs)') +
   ylab('Fuel efficiency (mpg)') + 
-  scale_color_gradient(low = 'red',
-                       high='blue',name='Fuel\n efficiency\n (mpg)') +
-  guides(col = guide_legend(ncol = 1),
+  scale_color_gradient(
+    low = 'red',
+    high='blue',
+    name='Fuel\n efficiency\n (mpg)', 
+    breaks = breaks_extended(3)) +
+  guides(color = FALSE,
          shape = guide_legend())
 ```
 
@@ -158,7 +170,7 @@ Good graphical representations maximize data-ink and erase as much non-data-ink 
 
 For example, the boxplot is a simple five number summary of a continuous variable that draws multiple rectangles, lines and points to show the quantiles of the data and any outliers [@Frigge1989]. Tufte considers that the outliers are not important in showing the typical spread of the data and that the box is unnecessary as the quantiles are shown with the 'whiskers' of the plot and the median line. A standard boxplot from ggplot2 is shown in Figure \ref{fig:ggbox} and a version that removes extraneous lines and points in Figure \ref{fig:tuftebox}.
 
-``` {r fig.margin=T, fig.cap='Standard boxplot\\label{fig:ggbox}', echo=T}
+``` {r fig.margin=T, fig.cap='Standard boxplot\\label{fig:ggbox}', echo=T, fig.height=2, fig.width=3}
 data(mtcars)
 
 ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
@@ -169,7 +181,7 @@ ggplot(data=mtcars, aes(x=factor(cyl), y=mpg)) +
 
 A lot of the elements of the boxplot can be removed without reducing our ability to distinguish the relevant information.
 
-``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=T, fig.height=1.5, fig.width=4}
+``` {r fig.margin=T, fig.cap="Tufte's interpretation of boxplot that maximises data ink\\label{fig:tuftebox}", echo=T, fig.height=1.5, fig.width=3}
 library(ggthemes) # for the tufte boxplot geometry
 data(mtcars)
 
@@ -218,8 +230,10 @@ ggplot(data=mtcars_am, aes(x = factor(cyl), y = mpg)) +
 ``` {r, echo=T, fig.cap='High dimensional data set with small multiples faceting by number of forward gears and transmission type. Two of the six facets are empty, indicating that the graph should be redesigned.', fig.margin=T, fig.height=2.5, fig.width=4}
 ggplot(data = mtcars_am,
        aes(x = factor(cyl), y = mpg)) +
-  geom_point(position = position_jitter(h = 0, w = 0.1)) +
-  facet_grid(Transmission ~ Gears, labeller = labeller(.cols = label_both)) +
+  geom_point(
+    position = position_jitter(h = 0, w = 0.1)) +
+  facet_grid(Transmission ~ Gears,
+             labeller = labeller(.cols = label_both)) +
   theme_bw() +
   xlab('Number of cylinders') +
   ylab('Fuel efficiency (mpg)')
@@ -236,9 +250,9 @@ ggplot(data = mtcars_am,
     
 
 
-# Additional geometries
+<!-- # Additional geometries
 
-### Bar/column plots
+## Bar/column plots
 
 Good for showing the amount of something (requires meaningful zero)
 
@@ -272,7 +286,7 @@ ggplot(data = airquality, aes(x = Ozone)) +
   theme_bw()
 ```
 
-### Lines
+## Lines
 
 The `geom_line()` geometry assumes that the points are ordered from left to right along the $x$ axis. This may not always be the case, and we can instead order by the row in the data frame with `geom_path()`. This may be useful if, for example, we are tracking movement across spatial locations or wish to show the time-ordering of some observations that we would otherwise show in a scatter plot. 
 
@@ -293,6 +307,8 @@ ggplot(data = deer, aes(x=UTMX/1000, y=UTMY/1000)) +
   ggtitle('Movement of a deer across Northern Germany in 2008')
 
 ```
+
+-->
 
 # Aesthetics in ggplot2
 
@@ -345,7 +361,7 @@ ggplot(data = my.data.frame,
   geom_line(aes(y = my.prediction.from.a.linear.model))
 ```
 
-## Other plotting aesthetics
+# Other plotting aesthetics
 
 We can pass many other arguments in `ggplot2` to change things about the geometries we use to show the $x$ and $y$ variables. If we put these aesthetics outside the `aes()` statement, this will make this option constant for the entire geometry, e.g. `geom_point(color = 'red')` will make all of these points red. Alternatively, we can map a variable in the data frame to one of the following aesthestics:
 
@@ -358,7 +374,7 @@ We can pass many other arguments in `ggplot2` to change things about the geometr
 
 Below we look at some examples of changing one or more of these.
 
-### Group
+## Group
 
 ``` {r, echo=FALSE}
 bone <- read_tsv("bone.data.txt")
@@ -366,18 +382,19 @@ bone <- read_tsv("bone.data.txt")
 
 Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes. This is especially useful when we have many, many groups in the data set such as the `r nrow(count(bone, idnum))` participants in the spinal bone density data set in Figure \ref{fig:spnbmd}.
 
-``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width='100%', fig.cap = "Rate of change of spinal bone mineral density\\label{fig:spnbmd}"}
+``` {r, fig.height=3, fig.width=3, eval=T, echo=T, out.width='100%', fig.margin=T, fig.cap = "Rate of change of spinal bone mineral density\\label{fig:spnbmd}"}
 bone <- read_tsv("bone.data.txt")
 
 ggplot(data = bone, aes(x = age, y = spnbmd)) +
-  geom_point(alpha=0.1) + facet_wrap(~ gender) +
+  geom_point(alpha=0.1) + 
+  facet_wrap(~ gender, ncol = 1) +
   geom_line(aes(group = idnum)) +  theme_bw() +
-  labs(x = 'Age (years)', y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
-       title = 'Relative spinal bone mineral density')
+  labs(x = 'Age (years)',
+       y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})))
 
 ```
   
-### Colour and fill
+## Colour and fill
 
 We can set the colour common to all instances of the geometry by setting it constant, outside the `aes()` statement and then set the fill to vary according to some variable, e.g. Figure \ref{fig:fill} shows how common each range of ozone concentration is (bins of width 10ppb) and which months those observations were measured in.
 
@@ -391,7 +408,7 @@ ggplot(data = airquality, aes(x = Ozone)) +
   scale_fill_viridis_d(name = 'Month')
 ```
 
-### Size and shape
+## Size and shape
 
 
 ``` {r, fig.height=6, fig.width=6, eval=T, echo=T, out.width='100%'}
@@ -408,7 +425,7 @@ ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
 
 We must be careful when using shape that we do not choose to use a variable that has so many levels that it becomes too taxing for the reader to tell which is which. Thankfully, ggplot2 gives us some warning when try to do something stupid and use too many.
 
-### Alpha transparency
+## Alpha transparency
 
 Alpha refers to the transparency (1 = solid, 0 = fully transparent). This is useful when you've got lots of things stacked on top of each other in a plot and want to make it clear how many of them there are, or you're using an overlay.
 
