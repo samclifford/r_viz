@@ -1,0 +1,106 @@
+% % redefine itemsep to autofill space on beamer slides
+% % from https://tex.stackexchange.com/questions/369504#369597
+\makeatletter
+\renewcommand{\itemize}[1][]{%
+	\beamer@ifempty{#1}{}{\def\beamer@defaultospec{#1}}%
+	\ifnum \@itemdepth >2\relax\@toodeep\else
+	\advance\@itemdepth\@ne
+	\beamer@computepref\@itemdepth% sets \beameritemnestingprefix
+	\usebeamerfont{itemize/enumerate \beameritemnestingprefix body}%
+	\usebeamercolor[fg]{itemize/enumerate \beameritemnestingprefix body}%
+	\usebeamertemplate{itemize/enumerate \beameritemnestingprefix body begin}%
+	\list
+	{\usebeamertemplate{itemize \beameritemnestingprefix item}}
+	{\def\makelabel##1{%
+			{%
+				\hss\llap{{%
+						\usebeamerfont*{itemize \beameritemnestingprefix item}%
+						\usebeamercolor[fg]{itemize \beameritemnestingprefix item}##1}}%
+			}%
+		}%
+	}
+	\fi%
+	\setlength\itemsep{\fill}
+	\ifnum \@itemdepth >1
+	\vfill
+	\fi%  
+	\beamer@cramped%
+	\raggedright%
+	\beamer@firstlineitemizeunskip%
+}
+\def\enditemize{\ifhmode\unskip\fi\endlist%
+	\usebeamertemplate{itemize/enumerate \beameritemnestingprefix body end}
+	\ifnum \@itemdepth >1
+	\vfil
+	\fi%  
+}
+\makeatother
+
+\makeatletter
+\def\enumerate{%
+	\ifnum\@enumdepth>2\relax\@toodeep
+	\else%
+	\advance\@enumdepth\@ne%
+	\edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+	\advance\@itemdepth\@ne%
+	\fi%
+	\beamer@computepref\@enumdepth% sets \beameritemnestingprefix
+	\edef\beamer@enumtempl{enumerate \beameritemnestingprefix item}%
+	\@ifnextchar[{\beamer@@enum@}{\beamer@enum@}}
+\def\beamer@@enum@[{\@ifnextchar<{\beamer@enumdefault[}{\beamer@@@enum@[}}
+\def\beamer@enumdefault[#1]{\def\beamer@defaultospec{#1}%
+	\@ifnextchar[{\beamer@@@enum@}{\beamer@enum@}}
+\def\beamer@@@enum@[#1]{% partly copied from enumerate.sty
+	\@enLab{}\let\@enThe\@enQmark
+	\@enloop#1\@enum@
+	\ifx\@enThe\@enQmark\@warning{The counter will not be printed.%
+		^^J\space\@spaces\@spaces\@spaces The label is: \the\@enLab}\fi
+	\def\insertenumlabel{\the\@enLab}
+	\def\beamer@enumtempl{enumerate mini template}%
+	\expandafter\let\csname the\@enumctr\endcsname\@enThe
+	\csname c@\@enumctr\endcsname7
+	\expandafter\settowidth
+	\csname leftmargin\romannumeral\@enumdepth\endcsname
+	{\the\@enLab\hspace{\labelsep}}%
+	\beamer@enum@}
+\def\beamer@enum@{%
+	\beamer@computepref\@itemdepth% sets \beameritemnestingprefix
+	\usebeamerfont{itemize/enumerate \beameritemnestingprefix body}%
+	\usebeamercolor[fg]{itemize/enumerate \beameritemnestingprefix body}%
+	\usebeamertemplate{itemize/enumerate \beameritemnestingprefix body begin}%
+	\expandafter
+	\list
+	{\usebeamertemplate{\beamer@enumtempl}}
+	{\usecounter\@enumctr%
+		\def\makelabel##1{{\hss\llap{{%
+						\usebeamerfont*{enumerate \beameritemnestingprefix item}%
+						\usebeamercolor[fg]{enumerate \beameritemnestingprefix item}##1}}}}}%
+	\setlength\itemsep{\fill}
+	\ifnum \@itemdepth >1
+	\vfill
+	\fi%  
+	\beamer@cramped%
+	\raggedright%
+	\beamer@firstlineitemizeunskip%
+}
+\def\endenumerate{\ifhmode\unskip\fi\endlist%
+	\usebeamertemplate{itemize/enumerate \beameritemnestingprefix body end}
+	\ifnum \@itemdepth >1
+	\vfil
+	\fi%  
+}
+\makeatother
+
+% % set larger itemize font sizes
+% % from https://latex.org/forum/viewtopic.php?t=8515
+%\setbeamerfont{itemize/enumerate body}{size=\Large}
+%\setbeamerfont{itemize/enumerate subbody}{size=\large}
+%\setbeamerfont{itemize/enumerate subsubbody}{size=\normalsize}
+
+% % redefine \[\] via redefinition of same as equation* to be LARGE
+% % from https://tex.stackexchange.com/a/40531
+%\usepackage{etoolbox}
+%\BeforeBeginEnvironment{equation*}{\begingroup\LARGE}
+%\AfterEndEnvironment{equation*}{\endgroup}
+%\BeforeBeginEnvironment{align*}{\begingroup\LARGE}
+%\AfterEndEnvironment{align*}{\endgroup}
