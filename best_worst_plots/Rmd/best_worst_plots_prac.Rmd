@@ -1,169 +1,179 @@
 ---
-title: "Visualisation"
-subtitle: "It was the best of plots, it was the worst of plots"
-author: "Sam Clifford"
-date: "2019-10-31"
+title: 'Exploratory data analysis with ggplot2'
+subtitle: '2491 - Data challenge'
+author: 'Sam Clifford'
+date: '2021-01-14'
+output: 
+  pdf_document:
+    includes:
+      in_header: matrix.tex
 citation_package: natbib
+#csl: chicago-author-date.csl
 bibliography: extras.bib
-csl: chicago-author-date.csl
-output: word_document
 ---
 
 
 ```{r setup, include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, eval=FALSE,
-                      fig.align="center", dpi = 300)
+                      fig.align='center', dpi = 300)
 library(tidyverse)
+
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
 ```
 
 # Introduction
 
-## About this workshop
+## About this practical session
 
-In the lecture we introduced visualisation with the histogram, $x$-$y$ plots and other scatter plot techniques, and touched on Tufte's principles of graphical excellence.
+In the lecture session we introduced visualisation with the histogram, $x$-$y$ plots and other scatter plot techniques, and touched on some key principles from the work of both Tukey and Tufte.
 
-This prac will investigate the visual display of data and what makes a good and a bad graph.
+We will be looking at data on the forced expiratory volume in the first second of breath, FEV1, a measure of lung function. The data are from the "Six Cities" study, which aimed to investigate the relationship between air pollution and mortality described in @fev1. Re-analysis of this data is detailed in @Krewski2005i and @Krewski2005ii, and a discussion of the original study and the replicability of its results is found in @Choirat2019, who conclude that 
+
+> Environmental health researchers should first formulate a well-defined research question and based on that select the most appropriate method, in collaboration with biostatisticians and data scientists, that yields robust and interpretable results.
+
+With that in mind, and with a view to an already-formulated hypothesis being that air pollution explains variability in lung function in the chosen age cohort (after accounting for any confounders), this practical will focus on visual display of data to convey information that may not be simple to explain with summary statistics.
+
+**Getting help:** You may find it useful to look at the RStudio cheatsheets [@cheatsheets] and [ggplot2 documentation](https://ggplot2.tidyverse.org/reference/) for hints on how to implement particular graphical ideas. Another good resource is "R for Data Science" [@r4ds], particularly [Chapter 3](https://r4ds.had.co.nz/data-visualisation.html), "Data Visualisation", and [Chapter 7](https://r4ds.had.co.nz/exploratory-data-analysis.html), "Exploratory Data Analysis".
+
+## Learning outcomes
 
 * Assumed skills
-    - Writing R code into a script file
-    - Identifying things that are visually pleasing
+    - Writing code into a script file
+    - Understanding of $x$-$y$ plots
+    - Reading documentation, including the help file
 * Learning objectives
-    - Identifying things that are informative
-    - Being able to critique a graph
-    - Understanding why and how data is encoded and decoded visually
-    - Understanding the subjectivity of what is aesthetically pleasing
+    - Creating a graph using a layered grammar of graphics
+    - Being able to critique a graph that you have created
 * Professional skills
-    - Creating high quality graphics
+    - Using a git version control system
+    - Creating exploratory graphics which are reproducible and clear
+    - Documenting code by commenting
 
-<!-- ## Group formation -->
+## Group formation
 
-<!-- Organise yourselves into groups of 4-6 students to collaboratively solve the following workshop problems. -->
+You will be allocated to groups of 3-5 in Zoom breakout rooms. You should discuss within your group whether you wish to work through the activities together or as individuals, and what level of discussion you want to have on the activities.
 
 <!-- Assign the following roles. Someone may need to take on multiple roles or you may need to split a role depending on the size of your group. -->
 
-``` {r, echo=FALSE, results="asis", fig.align="center", eval=FALSE, fig.width=7, fig.height=5, fig.align = "center", out.width = "100%"}
+``` {r, echo=FALSE, results='asis', fig.align='center', eval=FALSE, fig.width=7, fig.height=5, fig.align = 'center', out.width = '100%'}
 library(pander)
 panderOptions('table.alignment.default', 'center')
-data.frame(Role = c("Chair", "Scribe", "Research", "Programmer", "Critical Friend", "Spokesperson"),
-           Duties = c("Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute",
-                      "Responsible for recording answers in this worksheet",
-                      "Has the slides ready and able to fetch other relevant information online",
-                      "Drives R with the support of the group",
-                      "Constructive criticism, is the group answering the question?",
-                      "Presentation of discussion points to class")) %>%
-  mutate(Name = rep("Student Name", nrow(.)),
-         Email = rep("Student Email", nrow(.))) %>%
-  pandoc.table(justify=rep("left", ncol(.)),
+data.frame(Role = c('Chair', 
+                    'Scribe', 
+                    #'Research', 
+                    #'Programmer',
+                    #'Critical Friend',
+                    'Spokesperson'),
+           Duties = c('Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute',
+                      'Responsible for recording answers in this worksheet',
+                      #'Has the slides ready and able to fetch other relevant information online',
+                      #'Drives R with the support of the group',
+                      #'Constructive criticism, is the group answering the question?',
+                      'Presentation of discussion points to class')) %>%
+  mutate(Name = rep('Student Name', nrow(.)),
+         Email = rep('Student Email', nrow(.))) %>%
+  pandoc.table(justify=rep('left', ncol(.)),
                graph.boxes=TRUE, table.split.table= Inf,
-               style="multiline", keep.line.breaks = TRUE,
-               split.cells = c("20%", "30%", "20%", "30%"))
+               style='multiline', keep.line.breaks = TRUE,
+               split.cells = c('20%', '30%', '20%', '30%'))
 
 ```
 
 A reminder of expectations in the prac:
 
-* Keep a record of the work being completed, both the R script and this document
-* Allow everyone a chance to participate in the discussion
+* Keep a record of the work being completed with a well-commented R script in your forked github repository
+* Allow everyone a chance to participate in the learning activities, keeping disruption of other students to a minimum while still allowing for fruitful discussion
 * All opinions are valued provided they do not harm others
-* Everyone is expected to help out with completing the work, learning seldom occurs solely by watching someone else do work
-
-# Activity 1 - Building an attempt at a plot
-
-We will be looking at a data set of the length and width of the feet of a class of fourth-graders in Ann Arbor, Michigan, collected in October 1997 [@meyer2006]. The experiment was performed to investigate whether boys do indeed have wider feet than girls.
-
-``` {r, eval=TRUE}
-library(tidyverse)
-library(mosaicData)
-
-data(KidsFeet)
-```
-
-**Exercise:** Copy and paste the code below to produce a bar plot that shows how foot length and foot width vary within the class of grade four students.
-
-``` {r, eval=TRUE}
-ggplot(data = KidsFeet, aes(x = name, y = width)) +
-  geom_col(aes(fill = length)) +
-  facet_grid(domhand ~ biggerfoot, 
-             labeller = label_both, 
-             scales = "free_x") +
-  theme_bw() +
-  scale_fill_gradientn(colours = rainbow(5),
-                       name = "Foot length (cm)") +
-  theme(axis.text.x = element_text(angle = 45, size = 6,
-                                   hjust = 1, vjust = 1),
-        legend.position = "bottom") +
-  ylab("Foot width (cm)") +
-  xlab("Student name")
-```
-
-**Exercise:** Discuss, within your group, what you think is good and bad about this plot. Does it conform to Tufte's principles of graphical excellence? Is it easy to interpret? Does it show the relationship we are interested in? List the three most important improvements that are needed for this graph to be useful.
-
-**Answer:**
-
-1. ...
-2. ...
-3. ...
-
-**Exercise:** As a group, discuss what you think each line of code in the above block does. You may wish to answer here or leave comments in your code (everything after a `#` is a comment)
-
-**Answer:**
-
-# Activity 2 -- Making a better graph
-
-Based on the ideas discussed, build a graph which your group believes better shows how the relationship between foot length and width varies within the class. You may choose to either modify the code given above or create your own graph from scratch. Make sure your code is written in your script file with appropriate comments.
-
-Some things you may wish to consider: 
-
-* fixing up the axis labels
-* a relevant title
-* a different theme
-* different plotting geometries
-* different aesthetic options for colour, shape, etc.
-
-You may wish to sketch the graph by hand before attempting to write the R code to generate it. This will help you and your group come to an agreement about the plot you want to make and will help the tutors understand what you're aiming for when you ask them for help.
-
-If you get stuck, look at the [ggplot2](https://ggplot2.tidyverse.org/reference/) documentation or ask a tutor. 
-
-**Exercise:** What changes did you make to improve the graph?
-
-**Answer:**
-
-1. ...
-2. ...
-3. ...
-
-**Delete this text and include your plot here.**
-
-# Activity 3 -- Making a worse graph
-
-Make a new graph as in the previous activity but make it as bad as possible while still attempting to honestly show the information (i.e. don't add things to the plot which can't be derived from the variables in the plot. 
-
-What are the principles of graphical excellence and how can we go against them to make a truly terrible plot? Think about what was bad about the bar plot provided earlier. Consider abusing the ability to map graphical options (e.g. color, fill, line type, point size) to our variables of interest.
-
-**Exercise:** What changes did you make to make the graph worse?
-
-**Answer:**
-
-1. ...
-2. ...
-3. ...
-
-**Delete this text and include your plot here.**
+* Everyone is expected to do the work, learning seldom occurs solely by watching someone else do work
 
 
-# Activity 4 -- Group discussion
+# Obtaining and loading the data
 
-Have participants present their best (and/or worst) graph from the last activities. What did they identify as good and bad and how has each group attempted to present the relationship?
+## Activity 1 - Forking the git repository
 
-# Tidy up
+Browse to the git repository at https://github.com/samclifford/eda_fev1 and click the "Fork" button in the top right corner. This will give you a copy of the repository under your own account that you'll have write access to.
 
-Make sure you save this Word document, your R script, and any graphs you have produced and email them to the entire group. Restart your CoW when you are finished, put the chairs back neatly around the desk, leaving the room in a better condition than you found it. Email your worst graph to [Dr Sam Clifford](mailto:sam.clifford@lshtm.ac.uk).
+Clone the remote repository (on the GitHub server) to your local machine.
+
+## Activity 2 - Loading the data
+
+Load the tidyverse package and then read the data in with `read_csv()`. Ensure you give your data object a meaningful name and that `id` is a factor variable.
+
+# Exploratory analysis
+
+There are partially worked code solutions in the R script in the git repository to get you started on some of these questions. After answering each question, save your script file and commit the changes in git.
+
+## Activity 3a - Correlation
+
+Calculate the correlation between FEV1 and age.
+
+**Question:** Given the strength of the linear association between these two variables, do you think a linear trend would be an appropriate model?
+
+## Activity 3b - Scatter plot
+
+Complete the code in the example script to generate a scatter plot that shows the relationship between FEV1 and age. Ensure your plot has appropriate labels.
+
+**Question:** Given the plot, do you think a linear trend would be an appropriate model?
+
+## Extension Activity 3c - Detecting outliers
+
+Group the data by individual `id` and calculate the correlation for each individual. Determine if there are any individuals for whom we see a decrease in FEV1 over time. What is causing this?
+
+## Activity 4a - How many observations?
+
+Many of the 300 individuals in the data set has been measured multiple times over the years. Count the number of times that each `id` is measured and make a bar plot to summarise the proportion of individuals who have 1, 2, etc. measurements.
+
+**Question:** How many individuals have only one measurement recorded?
+
+## Activity 4b - Showing each individual's change over time
+
+Visually account for the structure in the data by drawing a line for each level of `id`, treating it as a grouping variable. You may wish to adjust the attributes of these lines to ensure you don't end up with a giant mess of black on the screen.
+
+## Extension Activity 4c - Singleton observations
+
+While we cannot track the changes in FEV1 for individuals with only one measurement, this data can still contribute to our understanding of the overall change in FEV with age. Make a data frame that contains only those individuals with 1 observation and add them to your line plot as points.
+
+## Extension Activity 4d - Faceting on age
+
+For each individual, calculate the number of whole years of age they have attained (hint: `floor()`) and display a graphical summary that shows how FEV1 varies in each age group. You may want to experiment with different geometries here.
+
+## Activity 5 - Smooth trend
+
+Add a smooth trend line to your line graph to indicate the average relationship between FEV1 and age across all individuals. Use argument `method = 'loess'` to use a LOESS smooth, a locally weighted polynomial smoother that doesn't assume a particular functional form of the resulting curve [@cleveland1992local].
+
+# Further extensions
+
+## Extension activity 6 - Accounting for repeat measurement
+
+If you have completed all the other activities you may wish to try a more difficult task, namely building a regression model for the change in FEV1 with age that accounts for repeat measurement of individuals. Making use of the mgcv package in R [@gamair], we can fit a mixed effects model that uses a spline for the effect of age and has a random effects mean to account for the differences in baseline FEV1 across individuals using the `gamm` function [@gamm]. You may wish to use one `geom_line()` for the data and another `geom_line()` for the predicted values. When building your prediction data frame, make sure that you give the predicted values the name `FEV1` so you can reuse the aesthetics from the base plot.
+
+## Extension activity 7a - Additional summary tools - skimr
+
+The skimr package [@skimr] provides a way of extending the five number summary provided by `summary()` to a seven number summary, histogram of values, the number of observations missing, and corresponding completeness rate. Use `skim()` to generate a summary table of the data and investigate what information is available to you.
+
+You may also wish to experiment with passing in a grouped data frame (e.g. by age in whole years at enrolment). As `skim()` returns an object which is of class `data.frame` (and `tbl_df` among others) we can filter it, pivot from wide to long format, etc.
+
+## Extension activity 7b - Additional summary tools - GGally
+
+The GGally package contains many functions built using ggplot2 that allow further exploratory analysis. In particular, pairs plots (with `ggpairs()`) show pairwise comparisons for all variables passed in to them and can be a useful way to visualise many relationships at once. 
+
+Generate a pairs plot with `ggpairs()` but ensure you specify all columns except `id`, as this will result in an incomprehensible mess. You can pass additional options to `ggpairs()` (check the help file) to control aesthetics, what goes in the upper and lower triangles of the grid, whether to use density plots, histograms, etc. for the univariate summaries on the main diagonal of the plot, and many other things.
+
+NB: Because `ggpairs()` returns an object of class `gg`, you can add to it using the grammar of graphics.
+
+# Finishing up
+
+Ensure that you have pushed all your committed changes up to the remote repository.
 
 # Further reading
 
-A lot of the key ideas in data visualisation arose with @tufte, and are summarised by @pantoliano. [Tufte's website](https://www.edwardtufte.com/tufte/) is well worth exploring, particularly the discussion on how the visual presentation of information could have helped avert the *Challenger* disaster [@visstatthink1997].
+A lot of the key ideas in data visualisation that we will investigate arose with @tufte, and are summarised by @pantoliano. Some of the history of data visualisation is summarised well by @Friendly:05:gfkl and @Friendly:06:hbook. [Tufte's website](https://www.edwardtufte.com/tufte/) is well worth exploring, particularly the discussion on how the visual presentation of information could have helped avert the *Challenger* disaster [@visstatthink1997]. For some more guidance on using ggplot2 for data visualisation, check Chapter 3 of @r4ds, the RStudio cheatsheets [@cheatsheets], and @changgraphics.
 
-Some of the history of data visualisation is summarised well by @Friendly:05:gfkl and @Friendly:06:hbook.
+# References
 
-For some more guidance on using `ggplot2` for data visualisation, check Chapter 3 of @r4ds, the RStudio cheatsheets [@cheatsheets], and @changgraphics.

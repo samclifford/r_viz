@@ -1,79 +1,94 @@
 ---
-title: "It was the best of plots, it was the worst of plots"
-author: "Sam Clifford"
-date: "2019-10-31"
+title: 'Exploratory data analysis with ggplot2'
+subtitle: '2491 - Data challenge'
+author: 'Sam Clifford'
+date: '2021-01-14'
 output:
   beamer_presentation:
     keep_tex: true
-    theme: "Hannover"
-    colortheme: "dove"
-    fonttheme: "professionalfonts"
+    theme: 'Hannover'
+    colortheme: 'dove'
+    latex_engine: xelatex
     citation_package: natbib
     includes: 
-      in_header: matrix.tex
-header-includes:
- - \usepackage{hyperref}
- - \usepackage{longtable}
+      in_header: ["matrix.tex", "headers.tex"]
 bibliography: extras.bib
 #csl: chicago-author-date.csl
 ---
   
 ```{r global_options, include=FALSE}
 library(knitr)
+opts_knit$get('out.format')
+knit_patterns$set(all_patterns[['rnw']])
+
 library(tidyverse)
 library(ggthemes)
 
-output <- opts_knit$get("rmarkdown.pandoc.to")
+output <- opts_knit$get('rmarkdown.pandoc.to')
 knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
-                      fig.align="center", out.width = "100%",
+                      fig.align='center', out.width = '100%',
                       fig.width=4,  fig.height=2)
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
 ```
 
-# Principles of graphical excellence
+# What is exploratory data analysis?
 
-### Many uses of visualisation in science
+### What is exploratory data analysis?
 
-* Showing the data
-* Showing the results of analysis
-* Showing the physical phenomenon being described
-* Describing an experimental setup
+> Since the aim of exploratory data analysis is to learn what seems to be, it should be no surprise that pictures play a vital role in doing it well. There is nothing better than a picture for making you think of questions you had forgotten to ask (even mentally).
 
+@tukeytukey85
 
-### Tufte's principles
+### What is exploratory data analysis?
 
-\citet{tufte} and \citet{pantoliano}
-
-* Show the data
-    - Induce the viewer to think about the substance of the findings rather than the methodology, the graphical design, or other aspects
-    - Avoid distorting what the data have to say
-    - Serve a clear purpose:  description, exploration, tabulation, or decoration
-
-* Provide clarity
-    - Present many numbers in a small space, i.e., efficiently
-    - Make large data sets coherent
-    - Be closely integrated with the statistical and verbal descriptions of the data set
-  
-### Tufte's principles
-
-* Allow comparison where appropriate
-    - Encourage the eye to compare different pieces of data
-    - Reveal the data at several levels of detail, from a broad overview to the fine structure
-
-* Visual representations of data must tell the truth
-* Good graphical representations maximise data-ink and erase as much non-data-ink as possible
-* Avoid chartjunk, the excessive and unnecessary use of graphical effects in graphs
-* Don't map the same variable to multiple graphical elements (e.g. color and $y$ value)
-* Produce graphs with high data density
-
+* Combination of graphical and numerical summaries of data [@tukey1972some; @tukey1977exploratory]
+* Want to explore relationships in data with view to
+    - checking our assumptions about the data 
+    - model formulation
+    - designing further experiments 
+    
 ### Why do we visualise?
 
 * We don't just make graphs because it's fun (but it totally is!)
 * We do it to communicate information
 * Describing with summary statistics may not tell the whole story
-* Graph must communicate what's in your mind to reader, including key relationships
 * Reader should be able to understand what the graph means and not be
     - misled into thinking something that is untrue
     - distracted from the main point
+
+
+### Tufte's principles
+
+@tufte and @pantoliano
+
+* Show the data
+    - substance of results over method details or maker's skills
+    - avoid distorting data's meaning
+    - serve clear purpose:  description, exploration, tabulation, or decoration
+
+* Provide clarity
+    - many numbers, easily digestible
+    - coherent representation of large data set
+    - closely integrated with statistical and written descriptions of the data set
+  
+### Tufte's principles
+
+* Allow comparison where appropriate
+    - use aesthetics to draw attention to important details
+    - make clear that data has multiple levels of structure
+
+* Produce graphs with high data density
+    * make every drop of ink count
+    * careful use of whitespace
+* Avoid excessive and unnecessary use of graphical effects (chartjunk)
+* Don't use the same variable for multiple graphical elements (e.g. color and $y$ value)
+
     
 # Building plots
 
@@ -84,27 +99,63 @@ knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
     - choose a geometry for how to display these variables
     - adjustments to axis scales
     - adjustments to colors, themes, etc.
-    - adding extra commands in a "do this, then do this" manner
+    - adding extra commands in a 'do this, then do this' manner
+* python users have plotnine [@plotnine] which is based on the same ideas
   
-### Building a plot
-
+### Building plots
 
 * How do we structure a call to `ggplot` to make a plot?
-    - load `ggplot2` package
+    - load ggplot2 package
     - Specify we want a `ggplot` object and which data frame we're going to use, 
     - set **aesthetic options** to tell R which variables to map to the $x$ and $y$ axes of the plot
     - state geometry we're using to show variables
     
 ``` {r, eval=F, echo=T}
+library(ggplot2)
 ggplot(data = my.data.frame, 
        aes(x = my.x.variable,
            y = my.y.variable)) +
   geom_point()
 ```
 
+
+### Building plots
+
+* For example, consider a scatter plot of daily maximum temperature varying with solar radiation in New York City 1973
+* Each row in data has a pair of values $(x,y)$, shown as a point
+
+<!-- * Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements) -->
+
+
+``` {r, eval=T, echo=T, fig.width=6, fig.height=2, size = "scriptsize"}
+data(airquality)
+solar_temp_plot <- ggplot(data = airquality,
+       aes(x = Solar.R, y = Temp)) +
+  geom_point() 
+
+solar_temp_plot
+```
+
+### Scatter plot
+
+* We can add some human-friendly labels and change the theme
+
+\scriptsize
+
+``` {r, eval=T, echo=T, fig.width=6, fig.height=2, size = "small"}
+solar_temp_plot <- solar_temp_plot +
+  labs(x = 'Solar radiation (Langleys)',
+       y = 'Max. daily temp. (F)') +
+  theme_bw()
+
+solar_temp_plot
+```
+
+
+
 <!-- ### Building a plot -- an example -->
 
-<!-- * `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is change in spinal bone mineral density divided by time between two successive visits -->
+<!-- * `bone` data set from `ElemStatLearn` package has `age` of participant and `spnbmd` is rate of change in spinal bone mineral density, two successive measurements divided by time between them -->
 
 <!-- \tiny -->
 
@@ -126,7 +177,7 @@ ggplot(data = my.data.frame,
 <!-- ggplot(data = bone, -->
 <!--        aes(x = age, y = spnbmd)) + -->
 <!--   geom_point() + -->
-<!--   labs(x = "Age (years)", -->
+<!--   labs(x = 'Age (years)', -->
 <!--     y = expression(Rel.~BMD~(g~ cm^{-3}~yr^{-1}))) + -->
 <!--   theme_bw() -->
 <!-- ``` -->
@@ -135,7 +186,6 @@ ggplot(data = my.data.frame,
 <!-- ### Building a plot -- an example -->
 
 <!-- ``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4} -->
-<!-- library(hrbrthemes) -->
 <!-- library(dplyr) -->
 <!-- library(stringi) -->
 <!-- library(magrittr) -->
@@ -160,29 +210,28 @@ ggplot(data = my.data.frame,
 <!--             aes(group = idnum), alpha = 0.05) + -->
 <!--   facet_wrap(~ gender) + -->
 <!--   theme_bw() + -->
-<!--   geom_line(data=bone, stat="smooth", -->
+<!--   geom_line(data=bone, stat='smooth', -->
 <!--               alpha = 0.25, -->
-<!--               #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") + -->
-<!--               method="loess", color="blue", -->
+<!--               #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') + -->
+<!--               method='loess', color='blue', -->
 <!--             size=1.5) + -->
 <!--   labs( -->
-<!--     x = "Age (years)", -->
+<!--     x = 'Age (years)', -->
 <!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1}))), -->
-<!--     title = "Relative spinal bone mineral density"#, -->
-<!--     #caption = "Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12" -->
+<!--     title = 'Relative spinal bone mineral density'#, -->
+<!--     #caption = 'Data sourced from Bachrach et al. (1999)\n J Clin Endocrin Metab 84 (12): 4702-12' -->
 <!--   ) -->
 
 <!-- ``` -->
 
-<!-- * We can keep adding more elements and options to show more details of the data -->
-<!--     - some explained in this lecture -->
-<!--     - some in later weeks and online \citep{layered-grammar, cheatsheets} -->
+<!-- We can keep adding more elements and options to show more details of the data \citep{layered-grammar, cheatsheets} -->
+
 
 <!-- ### Presentation of plots -->
 
-<!-- ``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap="Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12", res=300} -->
+<!-- ``` {r, eval=T, echo=F, warning=FALSE, message=FALSE, fig.width=4, fig.height=2, fig.cap='Average rate of change (relative) of spinal bone mineral density over time in healthy male and female youths. Lines show individuals with repeated observations. Data sourced from Bachrach et al. (1999) J Clin Endocrin Metab 84 (12): 4702-12', res=300} -->
 
-<!-- #png(width = 6, height = 3, filename = "fancy_2.png", units = "in", res = 300) -->
+<!-- #png(width = 6, height = 3, filename = 'fancy_2.png', units = 'in', res = 300) -->
 <!-- ggplot(data = bone, -->
 <!--        aes(x = age, y = spnbmd)) + -->
 <!--   geom_point(alpha = 0.125, stroke=0, pch=19, -->
@@ -191,66 +240,20 @@ ggplot(data = my.data.frame,
 <!--             aes(group = idnum), alpha = 0.05) + -->
 <!--   facet_wrap(~ gender) + -->
 <!--   theme_bw() + -->
-<!--   geom_line(data=bone, stat="smooth", -->
+<!--   geom_line(data=bone, stat='smooth', -->
 <!--               alpha = 0.25, -->
-<!--               #method="gam", formula = y ~s(x, bs="ps", k=6), fill="lightskyblue") + -->
-<!--               method="loess", color="blue", -->
+<!--               #method='gam', formula = y ~s(x, bs='ps', k=6), fill='lightskyblue') + -->
+<!--               method='loess', color='blue', -->
 <!--             size=1.5) + -->
 <!--   labs( -->
-<!--     x = "Age (years)", -->
+<!--     x = 'Age (years)', -->
 <!--     #y = expression(Rel.~Bone~Mineral\\n~Density~(g ~ cm ^ {-3}~yr^{-1}))) -->
 <!--     y = expression(atop(Rel.~Bone~Mineral, Density~(g~cm^{-3}~yr^{-1})))) -->
 
 <!-- ``` -->
 
-# Some common geometries
+# Some more geometries
 
-
-### Scatter plot
-
-* For each observation in data, a pair of values $(x,y)$ is shown as a point
-* Can show more structure in the data by setting aesthetics of the geometry (mapping variables to graphical elements)
-* e.g. if we want to show male and female relative bone density values with different colours
-
-\footnotesize
-
-``` {r, eval=F, echo=T, fig.width=4, fig.height=2}
-data(airquality)
-ggplot(data = airquality,
-       aes(x = Solar.R, y = Temp)) +
-  geom_point() +
-  labs(x = "Solar radiation (Langleys)",
-       y = "Maximum daily temperature (F)") +
-  theme_bw()
-```
-
-### Scatter plot
-
-
-``` {r, eval=T, echo=F, fig.width=4, fig.height=2}
-ggplot(data = airquality,
-       aes(x = Solar.R, y = Temp)) +
-  geom_point() +
-  labs(x = "Solar radiation (Langleys)",
-       y = "Maximum daily temperature (F)") +
-  theme_bw()
-```
-
-
-### Boxplot
-
-\tiny
-
-``` {r, fig.height=2, fig.width=4, eval=T, echo=T}
-
-ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
-  geom_boxplot() + theme_bw() +
-  labs(y = "Ozone conc. (ppb)", x = "Month")
-```
-
-\normalsize
-
-* **outliers** shown as dots, indicating they're far away from typical values
 
 ### Line plot
 
@@ -265,31 +268,34 @@ ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
 
 \tiny
 
-``` {r, fig.height=1.75, fig.width=4, echo=T}
+``` {r, fig.height=3, fig.width=8, echo=T}
 # make the date column
-airquality <-
-  mutate(airquality,
-         Date = as.Date(paste("1973", Month, Day, sep="-")))
+airquality <- mutate(airquality,
+                     Date = as.Date(paste('1973', Month, Day, sep = '-')))
 
-ggplot(data=airquality, aes(x=Date, y=Ozone)) +
+airquality_plot <- ggplot(data=airquality, aes(x=Date, y=Ozone)) +
   geom_line() + theme_bw() +
-  labs(y="Concentration (ppb)",
-       title = "Daily mean Ozone in NYC (1973)")
+  labs(y='Ozone concentration (ppb)',
+       title = 'Daily mean Ozone in NYC (1973)')
+
 ```
 
 ### Line plot
 
-* `geom_line()` stops plotting when it hits an `NA` value
-* If we have individual measurements in a group of `NA` values it won't plot that value 
-* Can use multiple geometries to display the same variables
+``` {r, fig.height=3, fig.width=8, echo=T}
+airquality_plot
 
-\tiny
+```
 
-``` {r, fig.height=1.75, fig.width=4, echo=T}
-ggplot(data=airquality, aes(x=Date, y=Ozone)) +
-  geom_line() + geom_point() + theme_bw() +
-  labs(y="Concentration (ppb)",
-       title = "Daily mean Ozone in NYC (1973)")
+* We see here that there are gaps in the line due to missing data
+
+### Line plot
+
+* If we have an observation whose neighbours are both `NA` values it can't be plotted with a line
+* Can layer multiple geometries for same aesthetic mapping
+
+``` {r, fig.height=3, fig.width=8, echo=T, size = "tiny"}
+airquality_plot + geom_point()
 ```
 
 
@@ -299,49 +305,72 @@ ggplot(data=airquality, aes(x=Date, y=Ozone)) +
 * Maybe we want to show the reader the trend in the data
 * `geom_smooth()` generates a **scatterplot smoother** that shows the overall relationship between $y$ and $x$
 
-\tiny 
 
-``` {r, echo=T, message=F, fig.width=4, fig.height=2}
-ggplot(data=airquality, aes(x=Temp, y=Ozone)) +
-  geom_point() + geom_smooth() + theme_bw() +
-  labs(x=expression(Temperature~(degree*F)), y="Ozone (ppb)")
+``` {r, echo=T, message=F, fig.width=6, fig.height=3, size = "small"}
+airquality_plot + geom_point() + geom_smooth() 
 ```
 
-### Bar/column plots
 
-* Good for showing the amount of something (requires meaningful zero)
-* `geom_col()` - $xy$ plot given some variables `x`, `y`
-* `geom_bar()` - counts number of of times categorical $x$ occurs
-* `geom_histogram()` - counts number of times $x$ in bin
+### Boxplot
 
-### Bar/column plots
+\tiny
 
+``` {r, fig.height=2, fig.width=4, eval=T, echo=T}
+
+ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
+  geom_boxplot() + theme_bw() +
+  labs(y = 'Ozone conc. (ppb)', x = 'Month')
+```
+
+\normalsize
+
+* **outliers** shown as dots, indicating they're far away from typical values
+
+### Histograms
+
+* univariate graphical summary needs only one aesthetic, `x`
 * e.g. a histogram of Ozone concentrations
 
-\tiny 
 
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2}
+``` {r, eval=T, echo=T, message=F, fig.width=6, fig.height=2, size = "scriptsize"}
 ozone_hist <-
   ggplot(data = airquality, aes(x = Ozone)) +  
   geom_histogram(binwidth = 10, boundary = 0) +  
-  labs(x = "Ozone concentration (ppb)") +
+  labs(x = 'Ozone concentration (ppb)') +
   theme_bw()
 
 ozone_hist
 ```
 
-### Bar/column plots
+# Aesthetics
 
-* e.g. a bar plot of month
+### Aesthetics
 
-\footnotesize
+* We've seen the $x$ and $y$ positions so far
+* We can also map the following options to variables 
+    - **size** of point or thickness of boundary
+    - **shape** of points
+    - **colour** of boundary
+    - **alpha** transparency
+    - **fill** colour of internals of geometry
+    - **group** to repeat geometry for each subset of the data corresponding to the grouping variable
+    
+* We can also put these (except group) *outside* `aes()` to fix the value for all parts of that geometry
+* Any aesthetics specified inside `ggplot()` will be inherited by all geometries for that plot
 
-``` {r, eval=T, echo=T, message=F, fig.width=4, fig.height=2, out.width = "100%"}
-ggplot(data = airquality, aes(x = factor(Month))) +  
-  geom_bar() + labs(x = "Month") + theme_bw()
+### Aesthetics
 
+\tiny
+
+``` {r, eval=T, echo=T, fig.height=2, fig.width=4, message=F}
+ggplot(data = airquality, aes(x = Ozone)) +  
+  geom_histogram(aes(fill = factor(Month)),
+                 binwidth = 10, boundary = 0,
+                 color = 'black') +  
+  labs(x = 'Ozone concentration (ppb)') +
+  theme_bw() + 
+  scale_fill_viridis_d(name = 'Month')
 ```
-
 
 # Small multiples
 
@@ -366,165 +395,59 @@ ozone_hist + facet_wrap( ~ Month, nrow = 1)
 
 ### Small multiples
 
-* If we have two (or more) grouping variables we can use `facet_grid(V1 ~ V2)` to tell R to repeat the plotting geometries for each value of `V1` and `V2` as rows and columns of a grid
+* If we have two (or more) grouping variables we can use `facet_grid()` to tell R to repeat the aesthetic and geometries for specified `rows` and `columns` variables
 
-\tiny
+* Let's consider monthly averages of daily max, mean and min temperatures
 
-``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = "100%"}
+``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%', size = "tiny"}
 library(mosaicData)
-
 data(Weather)
 
-annual_5_cities <- Weather %>% 
-  group_by(city, month, year) %>%
-  summarise_at(.vars = vars(contains("temp")), .funs = list(mean))  %>%
-  ggplot(data = ., aes(x = month, y = avg_temp)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = low_temp, ymax = high_temp),
-              alpha = 0.25) + theme_bw() +
-  xlab("Month") + ylab(expression(Temperature~(degree*F))) +
-  ggtitle("Monthly average of daily mean, min and max temperatures") +
-  facet_grid(year ~ city) +
-  scale_x_continuous(breaks = seq(1, 12, by = 3))
+Weather_summarised <-
+  aggregate(data = Weather, FUN = mean, 
+            cbind(high_temp, avg_temp, low_temp) ~ city + month + year)
 
 ```
 
+Or using the tidyverse approach
+
+``` {r, eval=FALSE, out.width = '100%', size = "tiny", echo = TRUE}
+Weather_summarised <-
+  group_by(Weather, city, month, year) %>%
+  summarise_at(.vars = vars(contains("temp")),
+               .funs = mean)
+```
+
+### Small multiples
+
+``` {r, echo=TRUE, fig.width = 8, fig.height = 2, out.width = '100%', size = "scriptsize"}
+
+Weather_plot <-
+  ggplot(data = Weather_summarised, 
+         aes(x = month, y = avg_temp)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = low_temp, ymax = high_temp),
+              alpha = 0.25) +
+  theme_bw() +
+  xlab('Month') + ylab(expression(Temperature~(degree*F))) +
+  ggtitle(
+    'Monthly avg. of daily mean, min and max temperatures') +
+  facet_grid(rows = vars(year), cols = vars(city)) +
+  scale_x_continuous(breaks = seq(1, 12, by = 3), 
+                     minor_breaks = seq(1, 12), 
+                     labels = function(x){month.abb[x]})
+```
 
 ### Small multiples
 
 
 
-``` {r, fig.height=3, fig.width=6, eval=T, echo=F, out.width="100%"}
-annual_5_cities
+``` {r, fig.height=3, fig.width=6, eval=T, echo=F, out.width='100%'}
+Weather_plot
 ```
 
-# Other plotting aesthetics
-
-### # a e s t h e t i c
-
-* `ggplot2` allows the passing of arguments to a plotting geometry
-* Map things other than $x$ and $y$ coordinates
-* **Aesthetics** map variables to graphical elements such as
-    - **group** (repeat geometry for a grouping variable in same axes)
-    - **size**
-    - **shape**
-    - **colour**
-    - **alpha** transparency
-    - **fill** colour
-* We need to put these inside `aes()` brackets if we wish to map a variable
-* Optionally, putting them outside (but still inside the geometry) allows us to apply one value across the whole geometry
-
-### Group
-
-* Instead of splitting all data up with small multiples, we could use grouping to show each each group on a common set of axes
-
-\tiny 
-
-``` {r, fig.height=2, fig.width=6, eval=T, echo=T, out.width="100%"}
-library(ElemStatLearn)
-data(bone)
-
-ggplot(data = bone, aes(x = age, y = spnbmd)) +
-  geom_point(alpha=0.1) + facet_wrap(~ gender) +
-  geom_line(aes(group = idnum)) +  theme_bw() +
-  labs(x = "Age (years)", y = expression(Rel.~BMD~(g~cm^{-3}~yr^{-1})),
-       title = "Relative spinal bone mineral density")
-
-```
-  
-\normalsize
-  
-* Especially useful when many, many groups
-  
-### Colour and fill
-
-* We can change the colour for the geometry as a whole by putting it outside the `aes()` brackets
-  * `colour` is the external part of geometry (e.g. bar boundary)
-  * `fill` is the internal part of geometry
 
 
-\tiny 
-
-``` {r, eval=T, echo=T, fig.height=2, fig.width=6, message=F, out.width="100%"}
-ggplot(data = airquality, aes(x = Ozone)) +  
-  geom_histogram(binwidth = 10, boundary = 0,
-                 fill = "lightskyblue", color = "black") +  
-  labs(x = "Ozone concentration (ppb)") +
-  theme_bw() + facet_wrap(~Month, nrow = 1)
-```
-
-### Size
-
-* Size refers to the elements of the plotting geometry
-    - radius of points
-    - thickness of lines
-
-\tiny
-
-``` {r, fig.height=3, fig.width=6, eval=T, echo=T, out.width="100%"}
-ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
-  geom_point(aes(size = Ozone), pch = 1) + theme(legend.position = "bottom") +
-  scale_size_area(name = "Ozone concentration (ppb)") +
-  labs(x = "Solar radiation (Langleys)",
-       y = expression(Max.~daily~temp.~(degree*F)))
-   
-```
-
-### Alpha transparency
-
-* Alpha refers to the transparency (1 = solid, 0 = fully transparent)
-* Useful when you've got lots of things stacked on top of each other in a plot
-
-\tiny 
-
-``` {r, echo=T, message=F, fig.width=6, fig.height=2.5, out.width="100%"}
-ggplot(data = airquality, aes(x = Solar.R, y = Temp)) + theme_bw() +
-  geom_point(alpha = 0.25) + theme(legend.position = "bottom") +
-  geom_smooth() +
-  labs(x = "Solar radiation (Langleys)",
-       y = expression(Max.~daily~temp.~(degree*F)))
-```
-
-### Shape
-
-* Can change point shape to help identify grouping
-* Most useful when there's only a few groups
-
-\tiny
-
-``` {r, echo=T, message=F, fig.width=4, fig.height=2}
-data(mtcars)
-ggplot(data=mtcars, aes(x=wt, y=mpg)) +
-  geom_point(aes(shape=factor(am))) + theme_bw() +
-  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
-  geom_smooth(method = "lm")
-```
-
-### Changing the default options
-
-Many `scale_*` functions allow us to set options for the relevant aesthetic and corresponding legend name, e.g.
-
-* `scale_color_gradient()` makes a color gradient for when we use `aes(color=...)`
-* `scale_fill_brewer()` sets a color palette for `aes(fill=...)` using colour schemes at http://colorbrewer2.org/
-* `scale_shape(name = "Transmission", ...)` changes the title from "factor(am)" to "Transmission" for `aes(shape=factor(am))` in the previous slide
-* `scale_x_log10()` changes the $x$ axis to have a logarithmic scale in increasing powers of 10.
-* Find more at the [`ggplot2` documentation page](http://ggplot2.tidyverse.org/reference/)
-
-### Changing the default options
-
-\tiny
-
-``` {r, echo=T, message=F, fig.width=6, fig.height=3, out.width="100%"}
-ggplot(data=mtcars, aes(x=wt, y=mpg)) +
-  geom_point(alpha=0.75, aes(shape=factor(am), color = factor(cyl),
-                             size=factor(gear))) + theme_bw() +
-  scale_shape(name="Transmission", breaks=c("0", "1"),
-              labels=c("Auto", "Manual")) +
-  scale_size_discrete(name="Gears") +
-  scale_color_brewer(name="Cylinders", palette = "Pastel2") +
-  xlab("Weight (1000lbs)") + ylab("Fuel efficiency (mpg)") +
-  geom_smooth(method = "loess", se=FALSE, color = "black")
-```
 
 
 # Summary
@@ -532,30 +455,50 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) +
 ### Summary
 
 * We make graphs to tell a story with data
-* Graphs should draw the reader in and explain what they're seeing
+* Should draw reader in and explain what they're seeing
 * Plots are built from
     - geometric objects
     - axis scales
-    - coordinate systems (linear scale, logarithmic scale, 2D, 3D, etc.)
+    - coordinate systems (linear or logarithmic scale, 2D, 3D, etc.)
     - annotations (e.g. heading in small multiples)
 
     
 ### Summary
 
-* Successively building a plot with a grammar of graphics allows development of complex plots from simple elements and small changes
+* Successively building a plot with a grammar of graphics allows development of complex plots from simple elements and small changes \citep{layered-grammar, cheatsheets}
 * Choose a plotting geometry that helps tell the story
 * Meaningful labels remove ambiguity and confusion
+* Be careful not to put too much in
+
+### 
+
+\tiny
+
+``` {r, echo=T, message=F, fig.width=8, fig.height=4, out.width='100%'}
+ggplot(data=mtcars, aes(x=wt, y=mpg)) +
+  geom_point(alpha=0.75, aes(shape = factor(am, levels = c(0,1),
+                                            labels = c('Auto', 'Manual')),
+                             color = factor(cyl),
+                             size  = factor(gear))) + theme_bw() +
+  scale_shape(name = 'Transmission') +
+  scale_size_discrete(name = 'Gears') +
+  scale_color_brewer(name='Cylinders', palette = 'Pastel2') +
+  xlab('Weight (1000lbs)') + ylab('Fuel efficiency (mpg)') +
+  geom_smooth(method = 'loess', se=FALSE, color = 'black') +
+  geom_smooth(method = 'lm',    se=FALSE, aes(color = factor(cyl)))
+```
+
 
 ### Further reading
 
-* Extra notes on Tufte's principles
+<!-- * Extra notes on Tufte's principles -->
 * History of visualisation
-    - @Friendly:05:gfkl
-    - @Friendly:06:hbook
+    - \citet{Friendly:05:gfkl}
+    - \citet{Friendly:06:hbook}
 * Visualisation to help decision making
     - @visstatthink1997
 * ggplot2 resources
     - @layered-grammar
     - @cheatsheets
+    - @changgraphics
 
-\scriptsize

@@ -1,0 +1,527 @@
+---
+title: 'Wrangling data with the tidyverse'
+subtitle: '2031 - Introduction to Statistical Computing'
+author: 'Sam Clifford'
+date: '2020-11-19'
+output:
+  beamer_presentation:
+    keep_tex: true
+    theme: 'Hannover'
+    colortheme: 'dove'
+    latex_engine: xelatex
+    citation_package: natbib
+    includes: 
+      in_header: matrix.tex
+header-includes:
+ - \usepackage{longtable}
+bibliography: extras.bib
+csl: chicago-author-date.csl
+---
+
+```{r global_options, include=FALSE, cache=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(knitr)
+
+opts_knit$get('out.format')
+
+
+#output <- opts_knit$get('rmarkdown.pandoc.to')
+knitr::opts_chunk$set(echo = FALSE, collapse=T, warning=FALSE, message=FALSE,
+                      fig.align='center', out.width = '100%',
+                      fig.width=4,  fig.height=2)
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+old_patterns = knit_patterns$get() # old pattern list (to restore later)
+all_patterns = all_patterns # a list of all built-in patterns
+knit_patterns$set(all_patterns[["rnw"]]) # set pattern list from 
+
+```
+
+
+# Introduction
+
+### Tidyverse
+
+* The *tidyverse* suite of R packages is designed to make working with data as easy as possible [@tidyverse]
+* Focus is on operating on objects that behave like data frames
+* The relevant packages from tidyverse for us are
+    - ggplot2: for plotting data (next week)
+    - dplyr: for manipulating data frames
+    - tidyr: for making data tidy
+    - forcats: for manipulating factor variables
+    - *magrittr: for easy chaining of commands*
+    
+[@r4ds; @welcometidyverse]
+
+\small
+
+``` {r eval=FALSE, echo=TRUE}
+library(tidyverse)
+```
+
+# Reshaping data frames
+
+### Long and wide tidy data
+
+* Every data set has its own quirks 
+
+<!-- * Every modelling package has its own way of returning outputs -->
+<!--     - data frame -->
+<!--     - matrix -->
+<!--     - list of the above -->
+
+* Tidy **data frames** consist of a number of observations (rows) of variables (columns), they can be either **wide** or **long** 
+
+* Data usually stored as
+    * 1 row per observations
+    * 1 column per variable
+    * $X_{ij}$ is $i$th observation of $j$th variable
+    * Tidy because all observations have an entry for each variable (even if it's NA)
+
+* Data needs to be the right shape for the functions being used
+
+[@JSSv059i10]
+
+<!-- * ggplot2 (next week) usually requires long data -->
+
+
+### Long and wide tidy data
+
+* An example of a wide data frame which we might encounter is the output of an SIR model
+
+\small
+
+``` {r echo=FALSE}
+library(tidyverse)
+SIR <- read_csv('beta_1.4247_gamma_0.14286.csv')
+```
+
+:::::::::::::: {.columns}
+
+::: {.column}
+
+**Wide data **
+
+``` {r}
+SIR %>% 
+  filter(time %% 0.5 == 0, time <= 1) %>%
+  knitr::kable(., 
+               digits=6,
+               format = 'latex',
+               booktabs = TRUE)
+```
+
+
+* *key*: this `state` at this `time`
+* *value*: `proportion`
+
+
+:::
+
+::: {.column}
+
+
+**Long data **
+
+``` {r}
+SIR_long <- 
+  pivot_longer(data            = SIR, 
+               cols            = c(S, I, R), 
+               names_to        = 'state', 
+               values_to       = 'proportion')
+
+SIR_long %>% 
+  filter(time %% 0.5 == 0, time <= 1) %>%
+  knitr::kable(., 
+               digits=6,
+               format = 'latex',
+               booktabs = TRUE, linesep='')
+```
+
+:::
+::::::::::::::
+
+
+<!-- \normalsize -->
+
+<!-- * Here we have values of $S(t), I(t), R(t)$ at given values of $t$ -->
+
+
+### Long and wide tidy data
+
+* Our numerical solution to the SIR model is a wide data frame, values of $S(t), I(t), R(t)$ at given values of $t$ 
+
+* We *pivot* the columns in `SIR` so that the data frame is *longer*
+* This pivoting to a longer data frame helps us put the data in *key*-*value* pairs
+* The key is the unique identifier
+    * state - $S$, $I$, or $R$, and
+    * time
+* The value is the proportion of the population in this state at this time
+
+### Long and wide tidy data
+
+* To make this pivot, we specify in tidyr's `pivot_longer()` function
+    * which `cols` are to be converted from being $k$ columns of length $n$ to one column of length $n \times k$
+    * the *names* column, `state`, contains the names of the columns being pivoted
+    * the name of the column containing the *value* (proportion) of each `state` at given `time`
+
+
+\footnotesize
+
+``` {r gather_sir, echo=TRUE}
+SIR_long <- pivot_longer(
+  data            = SIR, 
+  cols            = c(S, I, R), 
+  names_to        = 'state', 
+  values_to       = 'proportion')
+```
+
+* NB: we need to use `'` quotes for `names_to` and `values_to` arguments because they are strings defining new columns
+
+### Long and wide tidy data
+
+
+:::::::::::::: {.columns}
+::: {.column}
+
+**Wide data **
+
+``` {r}
+SIR %>% 
+  filter(time %% 0.5 == 0, time <= 1) %>%
+  knitr::kable(., 
+               digits=6,
+               format = 'latex',
+               booktabs = TRUE)
+```
+
+
+
+* *key*: this `state` at this `time`
+* *value*: `proportion`
+
+:::
+::: {.column}
+
+
+**Long data **
+
+``` {r}
+SIR_long <- pivot_longer(
+  data            = SIR, 
+  cols            = c(S, I, R), 
+  names_to        = 'state', 
+  values_to       = 'proportion')
+
+SIR_long %>% 
+  filter(time %% 0.5 == 0, time <= 1) %>%
+  knitr::kable(., 
+               digits=6,
+               format = 'latex',
+               booktabs = TRUE, linesep='')
+```
+
+:::
+::::::::::::::
+
+### Long and wide tidy data
+
+* To convert to a wider format, we use `pivot_wider`
+* For example, we specify:
+    - the *data* source
+    - where we get the new column *names from* 
+    - where we get the new column *values from*
+
+``` {r, echo = TRUE, size = "scriptsize"}
+
+SIR_wide <- pivot_wider(
+  data        = SIR_long, 
+  names_from  = state,
+  #NB: these are variable names, so doesn't require ' quotes
+  values_from = proportion)
+
+head(SIR_wide, 3)
+
+```
+
+* We have recovered our original simulation data frame
+
+# Summarising data
+
+### Summarising data
+
+\small
+
+* One of the most common data tasks is calculating summary statistics
+* Consider the `Gestation` data from `mosaicData`
+
+``` {r}
+library(mosaicData)
+data(Gestation)
+```
+
+> Birth weight, date, and gestational period collected as part of the Child Health and Development Studies in 1961 and 1962. Information about the baby's parents — age, education, height, weight, and whether the mother smoked is also recorded.
+
+* We will use some functions from dplyr to choose, group and summarise data
+
+### Summarising data
+
+* `count` how many mothers in each level of the `race` variable
+
+``` {r, echo = TRUE, size = "small"}
+count(Gestation, race)
+```
+
+* Calculate the mean birth weight in the data set
+
+``` {r, echo = TRUE, size = "small"}
+summarise(Gestation, Wt = mean(wt))
+```
+
+### Summarising data
+
+* We can calculate multiple summaries at once
+
+``` {r, echo = TRUE, size = "scriptsize"}
+summarise(Gestation,
+          Mean = mean(wt),
+          SD   = sd(wt),
+          Low  = quantile(wt, 0.025),
+          High = quantile(wt, 0.975))
+```
+
+or summarise multiple variables with the same function
+
+``` {r, echo = TRUE, size = "scriptsize"}
+summarise_at(Gestation, 
+             .vars = vars(gestation, wt, age),
+             .funs = list(mean), na.rm = T)
+```
+
+### Summarising data
+
+* We can even do multiple summaries across multiple variables by specifying which `.vars` we want to summarise and with which `.funs` we wish to summarise with
+
+``` {r, echo = TRUE, size = "scriptsize"}
+summarise_at(Gestation, 
+             .vars = vars(gestation, wt, age),
+             .funs = list(mean = mean,
+                          sd   = sd), na.rm = T)
+```
+
+### Summarising data
+
+* Where this is most powerful is when we specify a grouping structure in our data
+* `group_by` allows us to pass variable names to set the structure without changing row order
+* Result is a tibble with specified grouping structure
+
+``` {r, echo=TRUE, size = "tiny"}
+Gestation_grouped_by_race <-
+  group_by(Gestation, race)
+
+Gestation_grouped_by_race
+```
+
+### Summarising data
+
+* `summarise` respects the grouping structure
+
+``` {r, echo=TRUE, size = "small"}
+summarise_at(Gestation_grouped_by_race, 
+             .vars = vars(gestation, wt, age),
+             .funs = list(mean), na.rm = T)
+
+```
+
+<!-- * N.B. the `NA` race rows have been dropped because they don't have a grouping level -->
+
+# Relevelling factors
+
+### Relevelling factors
+
+* Default behaviours are:
+    - `pivot_longer()` respects column order when reshaping
+    - `key` column is character variable
+    - character variables coerced to alphabetic factors
+* We can set order of a factor variable by specifying levels
+* forcats package contains many `fct_*` functions to help with this
+* dplyr's `mutate()` to create, modify or delete a column in our data frame
+
+
+### Relevelling factors
+
+\small
+
+* Consider the `Gestation` data from `mosaicData`
+* May not make sense to sort race alphabetically
+* `NA` is not descriptive
+* Let's replace `NA` with an explicit factor level and sort differently
+
+``` {r echo=TRUE, size = "scriptsize"}
+Gestation <- mutate(
+  Gestation,
+  race2 = factor(race), 
+  race2 = fct_explicit_na(f        = race2, 
+                          na_level = "unknown"))
+
+count(Gestation, race2)
+```
+
+### Relevelling factors
+
+\small
+
+* This is now slightly more human friendly
+* We may wish to set the levels in order of how frequent they are
+
+``` {r echo=TRUE}
+Gestation <- mutate(
+  Gestation,
+  race2 = fct_infreq(race2))
+
+count(Gestation, race2)
+```
+
+### Relevelling factors
+
+* Many other functions in forcats
+    * `fct_inorder()` - for creating a factor variable with levels in the order from top to bottom
+    * `fct_relevel()` - change the order of levels
+    * `fct_recode()` - change the value of factor levels
+    * `fct_rev()` - reverse the existing levels of a factor
+    * `fct_relabel()` - relabel levels according to some function
+
+# Choosing rows and columns
+
+### Choosing columns
+
+* For one reason or another we may want to `select` only certain columns of our data frame
+
+``` {r, echo=TRUE, size = "tiny"}
+head(Gestation)
+
+head(select(Gestation, race2, wt, number))
+```
+
+### Choosing and renaming columns
+
+\small
+
+* We can also rename columns on the fly as we select them
+
+``` {r, size = "tiny", echo = TRUE}
+select(Gestation, Race     = race2, 
+       `Birthweight (lbs)` = wt,
+       `Cigs. smoked`      = number)
+```
+
+* Alternatively we can just `rename` columns without worrying about failing to select what we want to keep
+
+``` {r, size = "scriptsize", echo=TRUE}
+Gestation <- rename(Gestation, `Cigs. smoked` = number)
+```
+
+### Choosing rows
+
+* The dplyr equivalent of `subset` is `filter`
+* Takes a logical statement and does non-standard evaluation of variable names
+    - can use `filter(data, A & B)` or `filter(data, A, B)` equivalently
+
+``` {r echo=TRUE, size = "scriptsize"}
+Gestation2 <- select(Gestation,
+                     Race                = race2, 
+                     `Birthweight (lbs)` = wt,
+                     `Cigs. smoked`)
+
+filter(Gestation2, 
+       Race == "white", `Cigs. smoked` == "never")
+```
+
+### Arranging rows
+
+* The `arrange` function rearranges rows in ascending order of specified variables
+* Can be useful for exploratory analysis or if you need to create a column based on ranking of data
+
+
+``` {r, echo=TRUE, size = "tiny"}
+arrange(Gestation, date, wt)
+
+```
+
+# Pipe
+
+### Pipe
+
+\small
+
+* dplyr imports the `%>%` pipe from magrittr
+* `f(g(x))` is equivalent to `x %>% g %>% f`
+* Makes it easier to chain operations together without storing temporary objects
+* Output on left of `%>%` becomes first argument of function on right
+    - by convention, all tidyverse functions take a data frame as their first argument
+
+``` {r, eval = FALSE, size = "scriptsize", echo=TRUE}
+
+x %>% f_1 %>% f_2 %>% f_3
+
+# rather than
+
+f_3(f_2(f_1(x)))
+
+# or
+
+x_1 <- f_1(x)
+x_2 <- f_2(x_1)
+x_3 <- f_3(x_2)
+```
+
+### Pipe
+
+* An example
+
+``` {r echo, size = 'tiny', echo=TRUE}
+Gestation %>%
+  group_by(race2, `Cigs. smoked`) %>%
+  summarise(wt = mean(wt)) %>%
+  pivot_wider(names_from  = race2,
+              values_from = wt)
+
+```
+
+
+* Some find this a little confusing, so we won't dwell on it
+* NB the `Cigs. smoked` variable is character and sorted alphabetically.
+
+# Summary
+
+### Summary
+
+* Reshaping data frames
+    - `pivot_longer` from variables side by side to key-value
+    - `pivot_wider` from key-value to named column variables
+* Summarising data
+    - `group_by` to set a group structure
+    - `summarise` to calculate summary stats across group structure
+    - `count` to see how many rows in each group
+* Relevelling factors
+    - `factor` to set a factor variable
+    - `fct_*` for modifying factors
+* Choosing rows and columns
+    - `select` to choose columns
+    - `filter` to choose rows
+    - `arrange` to sort rows
+    
+### Additional Resources
+
+* More help on the [tidyverse](https://www.rstudio.com/resources/cheatsheets/) is available
+* The `#r4ds` community have [TidyTuesday](https://github.com/rfordatascience/tidytuesday) which makes use of the ideas in the R for Data Science book [@r4ds]
+* @JSSv059i10 on what tidy data is
+* @welcometidyverse for an explanation as to what the tidyverse is
+
+

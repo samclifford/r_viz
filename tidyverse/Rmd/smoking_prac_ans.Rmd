@@ -1,0 +1,255 @@
+---
+title: 'Wrangling data with the tidyverse - answers'
+subtitle: '2031 - Introduction to Statistical Computing'
+author: 'Sam Clifford'
+date: '2020-11-19'
+output: 
+  pdf_document:
+    includes:
+      in_header: matrix.tex
+citation_package: natbib
+csl: chicago-author-date.csl
+bibliography: extras.bib
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, 
+                      message=FALSE, eval=TRUE,
+                      results = "as.is",
+                      fig.align='center', dpi = 300)
+library(tidyverse)
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+```
+
+# Introduction
+
+## About this practical session
+
+In the lecture session we introduced data wrangling with the tidyverse as an alternative to using base R for common tasks.
+
+This prac will investigate some simple tasks for facilitating exploratory analysis of a data set on birth weight, date, and gestational period collected as part of the Child Health and Development Studies in 1961 and 1962. Information about the baby's parents — age, education, height, weight, and whether the mother smoked is also recorded.
+
+The study was designed to investigate the relationship between smoking status and birth weight and common confounders are included which may moderate the biology of the baby directly or through environmental or social factors.
+
+You are not required to use the pipe operator, `%>%`, from magrittr, but you are welcome to attempt to if you feel comfortable with piping in UNIX systems or feel like you have a reasonable level of R skills.
+
+* Assumed skills
+    - Writing R code into a script file
+    - Familiarity with data frames and spreadsheet-style data 
+    - Understanding of summary statistics
+* Learning objectives
+    - reshaping data
+    - modifying factor variables using functions
+    - calculating summary statistics for grouped data without using loops
+* Professional skills
+    - Creating summary tables for including in a report
+
+
+
+``` {r, echo=FALSE, results='asis', fig.align='center', eval=FALSE, fig.width=7, fig.height=5, fig.align = 'center', out.width = '100%', include=FALSE}
+library(pander)
+panderOptions('table.alignment.default', 'center')
+data.frame(Role = c('Chair', 'Scribe', 'Research', 'Programmer', 'Critical Friend', 'Spokesperson'),
+           Duties = c('Ensures the group is getting the work done in a timely manner and everyone gets a chance to contribute',
+                      'Responsible for recording answers in this worksheet',
+                      'Has the slides ready and able to fetch other relevant information online',
+                      'Drives R with the support of the group',
+                      'Constructive criticism, is the group answering the question?',
+                      'Presentation of discussion points to class')) %>%
+  mutate(Name = rep('Student Name', nrow(.)),
+         Email = rep('Student Email', nrow(.))) %>%
+  pandoc.table(justify=rep('left', ncol(.)),
+               graph.boxes=TRUE, table.split.table= Inf,
+               style='multiline', keep.line.breaks = TRUE,
+               split.cells = c('20%', '30%', '20%', '30%'))
+
+```
+
+A reminder of expectations in the prac:
+
+* Keep a record of the work being completed with a well-commented R script
+* Allow everyone a chance to participate in the learning activities, keeping disruption of other students to a minimum while still allowing for fruitful discussion
+* All opinions are valued provided they do not harm others
+* Everyone is expected to do the work, learning seldom occurs solely by watching someone else do work
+
+# Activity 1 - Quick look at the data
+
+We will be looking at the Gestation data set as found in the mosaicData package [@mosaicData; @nolan2001stat]. This data has been collected from the USA and contains records on 1236 single births between 1961 and 1962.
+
+**Exercise:** Copy and paste the code below to load the data set and the tidyverse package.
+
+``` {r, eval=TRUE, fig.width = 8, fig.height = 3}
+library(tidyverse)
+library(mosaicData)
+data(Gestation)
+```
+
+**Exercise:** Copy and paste the code below to count the number of observations in the data set
+
+``` {r}
+count(Gestation)
+```
+
+**Exercise:** Copy and paste the code below to count the number of observations in the data set in each level of the `race` variable
+
+``` {r}
+count(Gestation, race)
+```
+
+**Exercise:** Copy, paste and modify the code below to count the number of observations in the data set in each level of the `race` and `ed` (educational attainment) variables. Store the result.
+
+``` {r}
+Gestation_n_race_ed <- count(Gestation, race, ed)
+```
+
+**Exercise:** Copy, paste and complete the following code to convert the long data frame of counts to a wide data frame with a column for each race and a row for each level of educational attainment. NB: You don't *need* to use `'` quotes here.
+
+``` {r}
+pivot_wider(Gestation_n_race_ed, 
+            names_from  = race,
+            values_from = n)
+```
+
+**Exercise:** Look at the help file for `pivot_wider` for an argument that allow you to specify what value to fill any missing cells with and set it to 0
+
+``` {r}
+pivot_wider(Gestation_n_race_ed, 
+            names_from  = race,
+            values_from = n,
+            values_fill = 0)
+```
+
+# Activity 2 - Further summary statistics
+
+Now that we are familiar with our data frame and that we can count the number of entries, we will focus on some more useful summaries of the data.
+
+**Exercise:** Calculate the mean age of mothers in the data set
+
+``` {r}
+summarise(Gestation, mean(age, na.rm = T))
+```
+
+**Exercise:** Calculate the mean age of mothers in the data set again, but this time give a human friendly name for the calculated column. Here the backticks are necessary to allow us to put punctuation (a space) in our column name.
+
+``` {r}
+summarise(Gestation, `Mean age` = mean(age, na.rm = T))
+```
+
+**Exercise:** By adding an additional line to the calculation of summary statistics, calculate the mean birth weight in the data set.
+
+``` {r}
+summarise(Gestation,
+          `Mean age` = mean(age, na.rm = T),
+          `Mean wt`  = mean(wt,  na.rm = T)) 
+```
+
+# Activity 3 - Relevelling variables 
+
+Now we want to set up a grouped data frame to operate on so that every time we calculate summary statistics we have it for each level of the `race` variable. To ensure that the results we generate have slightly more human-friendly labels we will make a new variable that modifies the information in the `race` variable.
+
+**Exercise:** Copy and paste the following code to convert the `NA` values in `race` to an explicit level in a factor variable. Give the new level a sensible name by specifying a value for the `na_level` argument. NB: We use the `mutate` function any time we want to add to or modify a column in our data frame.
+
+``` {r}
+Gestation <- mutate(Gestation,
+                    race2 = factor(race), 
+                    race2 = fct_explicit_na(f        = race2, 
+                                            na_level = "unknown")) 
+```
+
+The stringr package is also part of the tidyverse and allows for more straightforward string manipulation than writing out regular expressions (although we can use regular expressions with stringr). The code below will convert the levels in `race2` to Title Case. 
+
+**Exercise:** Copy and paste the code below. Looking at the `count` output from Activity 1, what do you anticipate the first level of `race2` will become after running this code? What do you notice about the order of the levels in the output of `count` here?
+
+``` {r}
+Gestation <- mutate(Gestation, 
+                    race2 = str_to_title(race2),
+                    race2 = fct_infreq(race2))
+
+count(Gestation, race2)
+```
+
+40 mothers in this data set have been coded as "Mexican" in the data. Today we would probably recognise these mothers as "Hispanic". The code below will modify the `race2` variable to recode as "Hispanic" those listed as "Mex".
+
+**Exercise:** Add an argument to `fct_recode` that converts the "Mixed" level to "Multiracial". Use the help for this function if necessary.
+
+``` {r}
+Gestation <- mutate(Gestation,
+                    race2 = fct_recode(race2, 
+                                       "Hispanic"    = "Mex",
+                                       "Multiracial" = "Mixed"))
+``` 
+
+# Activity 4 - Combining the steps
+
+**Exercise:** Write code to generate a table of mean birth weights where each column label is a human-readable string derived from the `race` variable, and each row has a human-readable label for the mother's smoking status (`smoke`). You might find `str_to_sentence` and `rename` useful for generating this variable. Ensure that you have sensible labels when the `race` and `smoke` columns have `NA` values.
+
+**Answer:** One way to do this is as follows:
+
+``` {r, eval=TRUE}
+Gestation_mean_wt_by_race_smoke <- 
+    Gestation %>%
+    # change case
+    mutate(smoke = str_to_sentence(smoke)) %>%
+    # replace NA
+    mutate(smoke = fct_explicit_na(f = smoke, "Smoking unknown")) %>%
+    # change levels to be related to how recently mother smoked
+    mutate(smoke = fct_relevel(smoke,
+                               "Never",
+                               "Once did, not now", 
+                               "Until current pregnancy",
+                               "Now",
+                               "Smoking unknown")) %>%
+    # group by human-friendly race variable and smoking status
+    group_by(race2, smoke) %>%
+    # calculate mean birth weight
+    summarise(Mean = mean(wt, na.rm = T)) %>%
+    # make wider so that race is in columns
+    pivot_wider(names_from = "race2", values_from = "Mean") %>%
+    # rename to be a more human friendly column heading
+    rename("Smoking status" = smoke) 
+
+Gestation_mean_wt_by_race_smoke
+```
+
+We could then pipe the result to `write_csv` from readr (also part of the tidyverse) in order to include it in a report later.
+
+``` {r eval=FALSE}
+write_csv(x    = Gestation_mean_wt_by_race_smoke,
+          path = "Gestation_mean_wt_by_race_smoke.csv")
+```
+
+If we're building an R Markdown document we use knitr's `kable` function to get a nice table.
+
+``` {r}
+options(knitr.kable.NA = '-')
+
+knitr::kable(Gestation_mean_wt_by_race_smoke,
+             digits = 1,
+             caption = "Mean birth weight (lbs.) by race and smoking status.")
+```
+
+
+# Tidy up
+
+Make sure you save your R script, and anything else you have produced and ensure everyone in your group has a copy. 
+
+# Further reading
+
+* More help on the [tidyverse](https://www.rstudio.com/resources/cheatsheets/) is available
+* The `#r4ds` community have [TidyTuesday](https://github.com/rfordatascience/tidytuesday) which makes use of the ideas in the R for Data Science book [@r4ds]
+* @JSSv059i10 on what tidy data is
+* @welcometidyverse for an explanation as to what the tidyverse is
+
+
+
+# References
+
+\footnotesize
